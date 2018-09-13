@@ -10,8 +10,6 @@ import os
 import requests
 
 
-
-
 class DnsMeApi(object):
 
     def __init__(self, apikey: str='', apisecret: str=''):
@@ -122,11 +120,10 @@ class DnsMeApi(object):
 
     def add_a_record(self, site: str, name: str, ipaddress: str, ttl: int=86400):
 
+        data = {'name': name, 'type': 'A', 'value': ipaddress, 'gtdLocation': 'DEFAULT', 'ttl': ttl}
         site_id = self.get_site_id(site)
         targurl = self.url + f'/{site_id}/records/'
-
-        data = {'name': name, 'type': 'A', 'value': ipaddress, 'gtdLocation': 'DEFAULT', 'ttl': ttl}
-        content = self._post(targurl, data)
+        self._post(targurl, data)
 
     def delete_a_record(self, site: str, name: str):
 
@@ -138,12 +135,15 @@ class DnsMeApi(object):
 
         name_id = r[0]['id']
         targurl = self.url + f'/{site_id}/records/{name_id}'
-        content = self._delete(targurl)
+        self._delete(targurl)
 
 
 if __name__ == '__main__':
 
-    D = DnsMeApi(apikey=apikey, apisecret=secretkey)
-    D.add_a_record('simpa.io', 'testdomain2', '11.14.1.111')
-    D.delete_a_record('simpa.io', 'testdomain2')
+    apikey = os.environ['DNSMEKEY']
+    apisecret = os.environ['DNSMESECRET']
+
+    D = DnsMeApi(apikey=apikey, apisecret=apisecret)
+    D.add_a_record('simpa.io', 'app2', '52.24.97.113')
+    #D.delete_a_record('simpa.io', 'testdomain2')
 
