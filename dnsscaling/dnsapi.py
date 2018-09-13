@@ -42,7 +42,6 @@ class DnsMeApi(object):
             'x-dnsme-hmac': hmac,
             'Content-Type': 'application/json'
         }
-        headers['Content-Type'] = 'application/json'
 
         return headers
 
@@ -84,7 +83,7 @@ class DnsMeApi(object):
     def _get_account_data(self) -> list:
         return self._get(self.url, sub='data')
 
-    def get_site_id(self, site: str) -> str:
+    def _get_site_id(self, site: str) -> str:
 
         data = self._get_account_data()
 
@@ -93,10 +92,6 @@ class DnsMeApi(object):
                 return d['id']
 
         return ''
-
-    def get_records(self, site: str, type: str='', name: str='', value: str=''):
-        site_id = self.get_site_id(site)
-        return self._get_records(site_id, type=type, name=name, value=value)
 
     def _get_records(self, site_id: str, type: str='', name: str='', value: str=''):
 
@@ -118,16 +113,33 @@ class DnsMeApi(object):
             ret_list.append(x)
         return ret_list
 
-    def add_a_record(self, site: str, name: str, ipaddress: str, ttl: int=86400):
+    def add_a_record(self, site: str, name: str, ipaddress: str, ttl: int=300):
+        """
+        Add an A record to the site with name and ipaddress.
+
+        :param site:
+        :param name:
+        :param ipaddress:
+        :param ttl:
+        :return:
+        """
+
 
         data = {'name': name, 'type': 'A', 'value': ipaddress, 'gtdLocation': 'DEFAULT', 'ttl': ttl}
-        site_id = self.get_site_id(site)
+        site_id = self._get_site_id(site)
         targurl = self.url + f'/{site_id}/records/'
         self._post(targurl, data)
 
     def delete_a_record(self, site: str, name: str):
+        """
+        Delete an A record from site.
 
-        site_id = self.get_site_id(site)
+        :param site:
+        :param name:
+        :return:
+        """
+
+        site_id = self._get_site_id(site)
         r = self._get_records(site_id, type='A', name=name)
         if len(r) != 1:
             print(r)
