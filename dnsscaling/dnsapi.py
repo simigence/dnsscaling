@@ -11,11 +11,12 @@ import requests
 
 
 
+
 class DnsMeApi(object):
 
     def __init__(self, apikey: str='', apisecret: str=''):
 
-        self.url = 'https://api.dnsmadeeasy.com/V2.0'
+        self.url = 'https://api.dnsmadeeasy.com/V2.0/dns/managed'
 
         if not apikey:
             apikey = os.environ['DNSME_APIKEY']
@@ -52,7 +53,7 @@ class DnsMeApi(object):
         headers = self._create_headers()
 
         r = requests.get(url, headers=headers)
-        if r.status_code != 200:
+        if r.status_code != 200 and r.status_code != 201:
             raise Exception(f'Code {r.status_code}: {r.text}')
 
         content = json.loads(r.content)
@@ -60,15 +61,13 @@ class DnsMeApi(object):
             return content[sub]
         return content
 
-    def _put(self, url: str, data: dict, sub: str=''):
+    def _post(self, url: str, data: dict, sub: str=''):
 
         headers = self._create_headers()
-        print(headers)
-        print(data)
-        r = requests.put(url, data=json.dumps(data).encode('utf-8'), headers=headers)
-        if r.status_code != 200:
+        r = requests.post(url, data=json.dumps(data).encode('utf-8'), headers=headers)
+        if r.status_code != 200 and r.status_code != 201:
             print(r)
-            raise Exception(f'Code {r.status_code}: {r.text}')
+            raise Exception(f'Code {r.status_code}: Something went wrong with POST')
 
         content = json.loads(r.content)
         if sub:
@@ -79,15 +78,13 @@ class DnsMeApi(object):
 
         headers = self._create_headers()
         r = requests.delete(url, headers=headers)
-        if r.status_code != 200:
+        if r.status_code != 200 and r.status_code != 201:
             print(r)
-            print(r.content)
             raise Exception(f'Code {r.status_code}')
-        content = json.loads(r.content)
-        return content
+        return r
 
     def _get_account_data(self) -> list:
-        return self._get(self.url + '/dns/managed', sub='data')
+        return self._get(self.url, sub='data')
 
     def get_site_id(self, site: str) -> str:
 
@@ -105,7 +102,7 @@ class DnsMeApi(object):
 
     def _get_records(self, site_id: str, type: str='', name: str='', value: str=''):
 
-        targurl = self.url + f'/dns/managed/{site_id}/records'
+        targurl = self.url + f'/{site_id}/records'
 
         content = self._get(targurl, sub='data')
 
@@ -123,13 +120,13 @@ class DnsMeApi(object):
             ret_list.append(x)
         return ret_list
 
-    def add_a_record(self, site: str, name: str, ipaddress: str, ttl: int=600):
+    def add_a_record(self, site: str, name: str, ipaddress: str, ttl: int=86400):
 
         site_id = self.get_site_id(site)
-        targurl = self.url + f'/{site_id}/records'
+        targurl = self.url + f'/{site_id}/records/'
 
-        data = {'name': name, 'type': 'A', 'value': ipaddress, 'ttl': ttl}
-        content = self._put(targurl, data)
+        data = {'name': name, 'type': 'A', 'value': ipaddress, 'gtdLocation': 'DEFAULT', 'ttl': ttl}
+        content = self._post(targurl, data)
 
     def delete_a_record(self, site: str, name: str):
 
@@ -139,19 +136,14 @@ class DnsMeApi(object):
             print(r)
             raise Exception('Not valid lenght of return values')
 
-        print(r)
         name_id = r[0]['id']
         targurl = self.url + f'/{site_id}/records/{name_id}'
-        print("HERE", targurl)
         content = self._delete(targurl)
-        print(content)
 
 
 if __name__ == '__main__':
-    #raw_curl()
-    #check_records()
+
     D = DnsMeApi(apikey=apikey, apisecret=secretkey)
-    D.add_a_record('simpa.io', 'testdomain2', '11.1.1.111')
-    #D.get_site_id('simpa.io')
-    #D.delete_a_record('simpa.io', 'testdomain')
+    D.add_a_record('simpa.io', 'testdomain2', '11.14.1.111')
+    D.delete_a_record('simpa.io', 'testdomain2')
 
