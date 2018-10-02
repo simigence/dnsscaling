@@ -89,10 +89,10 @@ class DnsMeApi(object):
             raise Exception(s)
         return r
 
-    def _get_account_data(self) -> list:
+    def _get_account_data(self):
         return self._get(self.url, sub='data')
 
-    def _get_site_id(self, site) -> str:
+    def _get_site_id(self, site):
 
         data = self._get_account_data()
 
