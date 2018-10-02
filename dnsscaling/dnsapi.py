@@ -172,7 +172,7 @@ class DnsMeApi(object):
 def get_aws_ip():
     try:
         # check for aws ec2 instance
-        r = requests.get('http://169.254.169.254/latest/meta-data/local-ipv4', timeout=0.15)
+        r = requests.get('http://169.254.169.254/latest/meta-data/public-ipv4', timeout=0.25)
         aws_ip = r.text
     except:
         aws_ip = None
