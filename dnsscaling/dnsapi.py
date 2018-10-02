@@ -57,7 +57,7 @@ class DnsMeApi(object):
 
         r = requests.get(url, headers=headers)
         if r.status_code != 200 and r.status_code != 201:
-            s = 'Code' + r.status_code + ':' + r.text
+            s = 'Code ' + str(r.status_code) + ':' + str(r.text)
             raise Exception(s)
 
         content = json.loads(r.content)
