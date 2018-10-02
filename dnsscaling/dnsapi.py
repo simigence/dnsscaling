@@ -165,7 +165,7 @@ class DnsMeApi(object):
         if not name_id:
             raise Exception('No id found for name or name and ipaddress')
 
-        targurl = self.url + '/' + site_id + '/records/' + name_id
+        targurl = self.url + '/' + str(site_id) + '/records/' + str(name_id)
         self._delete(targurl)
 
 
@@ -212,3 +212,9 @@ def run_dnsscaling():
     elif args.delete_record:
         subdomain, domain = get_domain(args.add_record)
         D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
+
+
+if __name__ == '__main__':
+
+    D = DnsMeApi(test_mode=True)
+    D.delete_a_record('simpa.io', 'apijunk2', '10.0.0.6')
