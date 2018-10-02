@@ -21,6 +21,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
+            'dnsscaling=dnsscaling.dnsapi:run_dnsscaling'
         ],
     },
 )

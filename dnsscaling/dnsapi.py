@@ -2,27 +2,33 @@
 Script to perform DNS made easy api calls
 """
 
+import argparse
 from datetime import datetime
 import hashlib
 import hmac
 import json
 import os
 import requests
+import sys
 
 
 class DnsMeApi(object):
 
-    def __init__(self, apikey: str='', apisecret: str=''):
+    def __init__(self, test_mode: bool=False):
 
         self.url = 'https://api.dnsmadeeasy.com/V2.0/dns/managed'
 
-        if not apikey:
-            apikey = os.environ['DNSME_APIKEY']
-        if not apisecret:
-            apisecret = os.environ['DNSME_APISECRET']
+        self.ipaddress = None
+        if not test_mode:
+            self.ipaddress = get_aws_ip()
+            if not self.ipaddress:
+                raise Exception('Could not find ip address')
 
-        self.apisecret = apisecret
-        self.apikey = apikey
+        path = os.path.join(os.environ["HOME"], 'efs/credentials/dnsmadeeasy/dme_credentials.json')
+
+        creds = json.loads(open(path, 'r').read().strip())
+        self.apisecret = creds['apisecret']
+        self.apikey = creds['apikey']
 
     @staticmethod
     def _get_str_time() -> str:
@@ -37,7 +43,7 @@ class DnsMeApi(object):
         request_date = self._get_str_time()
         hmac = self._get_dns_hash(request_date, self.apisecret)
         headers = {
-            'x-dnsme-apiKey': apikey,
+            'x-dnsme-apiKey': self.apikey,
             'x-dnsme-requestDate': request_date,
             'x-dnsme-hmac': hmac,
             'Content-Type': 'application/json'
@@ -124,13 +130,12 @@ class DnsMeApi(object):
         :return:
         """
 
-
         data = {'name': name, 'type': 'A', 'value': ipaddress, 'gtdLocation': 'DEFAULT', 'ttl': ttl}
         site_id = self._get_site_id(site)
         targurl = self.url + f'/{site_id}/records/'
         self._post(targurl, data)
 
-    def delete_a_record(self, site: str, name: str):
+    def delete_a_record(self, site: str, name: str, ipaddress: str=''):
         """
         Delete an A record from site.
 
@@ -141,21 +146,65 @@ class DnsMeApi(object):
 
         site_id = self._get_site_id(site)
         r = self._get_records(site_id, type='A', name=name)
-        if len(r) != 1:
-            print(r)
-            raise Exception('Not valid lenght of return values')
 
-        name_id = r[0]['id']
+        name_id = None
+        if len(r) > 1 and not ipaddress:
+            raise Exception('More than one IP address found for the record name, specify an ip address to delete.')
+        elif len(r) == 0:
+            raise Exception(f'No A records found for {site} with {name}')
+        elif len(r) == 1:
+            name_id = r[0]['id']
+        else:
+            for x in r:
+                if x['value'] == ipaddress:
+                    name_id = x['id']
+        if not name_id:
+            raise Exception('No id found for name or name and ipaddress')
+
         targurl = self.url + f'/{site_id}/records/{name_id}'
         self._delete(targurl)
 
 
-if __name__ == '__main__':
+def get_aws_ip():
+    try:
+        # check for aws ec2 instance
+        r = requests.get('http://169.254.169.254/latest/meta-data/local-ipv4', timeout=0.15)
+        aws_ip = r.text
+    except:
+        aws_ip = None
+    return aws_ip
 
-    apikey = os.environ['DNSMEKEY']
-    apisecret = os.environ['DNSMESECRET']
 
-    D = DnsMeApi(apikey=apikey, apisecret=apisecret)
-    D.add_a_record('simpa.io', 'app2', '52.24.97.113')
-    #D.delete_a_record('simpa.io', 'testdomain2')
+def get_domain(fulldomain: str) -> tuple:
+    """Split the full domain into subdomain and domain"""
+    subdomain = fulldomain.split('.')[0]
+    domain = '.'.join(fulldomain.split('.')[1:])
+    return subdomain, domain
 
+
+def run_dnsscaling():
+
+    parser = argparse.ArgumentParser(description="Dnsmadeeasy automatic A record assignment")
+
+    parser.add_argument('-a', '--add_record', type=str, default='', help="Add an A record associated with the domain")
+    parser.add_argument('-d', '--delete_record', type=str, default='', help="Delete an A record "
+                                                                            "associated with the domain")
+
+    if not len(sys.argv) > 1:
+        parser.print_help()
+        sys.exit()
+
+    args = parser.parse_args()
+    if (not args.add_record and not args.delete_record) or (args.add_record and args.delete_record):
+        parser.print_help()
+        sys.exit()
+
+    D = DnsMeApi()
+
+    if args.add_record:
+        subdomain, domain = get_domain(args.add_record)
+        D.add_a_record(domain, subdomain, D.ipaddress)
+
+    elif args.delete_record:
+        subdomain, domain = get_domain(args.add_record)
+        D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
