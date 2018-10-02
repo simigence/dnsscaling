@@ -98,7 +98,7 @@ class DnsMeApi(object):
 
         for d in data:
             if d['name'] == site:
-                return d['id']
+                return str(d['id'])
 
         return ''
 
