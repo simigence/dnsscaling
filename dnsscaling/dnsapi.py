@@ -57,7 +57,8 @@ class DnsMeApi(object):
 
         r = requests.get(url, headers=headers)
         if r.status_code != 200 and r.status_code != 201:
-            raise Exception(f'Code {r.status_code}: {r.text}')
+            s = 'Code' + r.status_code + ':' + r.text
+            raise Exception(s)
 
         content = json.loads(r.content)
         if sub:
@@ -70,7 +71,8 @@ class DnsMeApi(object):
         r = requests.post(url, data=json.dumps(data).encode('utf-8'), headers=headers)
         if r.status_code != 200 and r.status_code != 201:
             print(r)
-            raise Exception(f'Code {r.status_code}: Something went wrong with POST')
+            s = 'Code ' + r.status_code + ' : Something went wrong with POST'
+            raise Exception(s)
 
         content = json.loads(r.content)
         if sub:
@@ -83,7 +85,8 @@ class DnsMeApi(object):
         r = requests.delete(url, headers=headers)
         if r.status_code != 200 and r.status_code != 201:
             print(r)
-            raise Exception(f'Code {r.status_code}')
+            s = 'Code ' + r.status_code
+            raise Exception(s)
         return r
 
     def _get_account_data(self) -> list:
@@ -101,7 +104,7 @@ class DnsMeApi(object):
 
     def _get_records(self, site_id, type='', name='', value=''):
 
-        targurl = self.url + f'/{site_id}/records'
+        targurl = self.url + '/' + site_id + '/records'
 
         content = self._get(targurl, sub='data')
 
@@ -132,7 +135,7 @@ class DnsMeApi(object):
 
         data = {'name': name, 'type': 'A', 'value': ipaddress, 'gtdLocation': 'DEFAULT', 'ttl': ttl}
         site_id = self._get_site_id(site)
-        targurl = self.url + f'/{site_id}/records/'
+        targurl = self.url + '/' + site_id + '/records/'
         self._post(targurl, data)
 
     def delete_a_record(self, site, name, ipaddress=''):
@@ -151,7 +154,8 @@ class DnsMeApi(object):
         if len(r) > 1 and not ipaddress:
             raise Exception('More than one IP address found for the record name, specify an ip address to delete.')
         elif len(r) == 0:
-            raise Exception(f'No A records found for {site} with {name}')
+            s = 'No A records found for' + site + 'with' + name
+            raise Exception(s)
         elif len(r) == 1:
             name_id = r[0]['id']
         else:
@@ -161,7 +165,7 @@ class DnsMeApi(object):
         if not name_id:
             raise Exception('No id found for name or name and ipaddress')
 
-        targurl = self.url + f'/{site_id}/records/{name_id}'
+        targurl = self.url + '/' + site_id + '/records/' + name_id
         self._delete(targurl)
 
 
