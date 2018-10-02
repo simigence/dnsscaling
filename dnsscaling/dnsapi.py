@@ -71,7 +71,7 @@ class DnsMeApi(object):
         r = requests.post(url, data=json.dumps(data).encode('utf-8'), headers=headers)
         if r.status_code != 200 and r.status_code != 201:
             print(r)
-            s = 'Code ' + r.status_code + ' : Something went wrong with POST'
+            s = 'Code ' + str(r.status_code) + ' : Something went wrong with POST'
             raise Exception(s)
 
         content = json.loads(r.content)
@@ -85,7 +85,7 @@ class DnsMeApi(object):
         r = requests.delete(url, headers=headers)
         if r.status_code != 200 and r.status_code != 201:
             print(r)
-            s = 'Code ' + r.status_code
+            s = 'Code ' + str(r.status_code)
             raise Exception(s)
         return r
 
@@ -104,7 +104,7 @@ class DnsMeApi(object):
 
     def _get_records(self, site_id, type='', name='', value=''):
 
-        targurl = self.url + '/' + site_id + '/records'
+        targurl = self.url + '/' + str(site_id) + '/records'
 
         content = self._get(targurl, sub='data')
 
@@ -135,7 +135,7 @@ class DnsMeApi(object):
 
         data = {'name': name, 'type': 'A', 'value': ipaddress, 'gtdLocation': 'DEFAULT', 'ttl': ttl}
         site_id = self._get_site_id(site)
-        targurl = self.url + '/' + site_id + '/records/'
+        targurl = self.url + '/' + str(site_id) + '/records/'
         self._post(targurl, data)
 
     def delete_a_record(self, site, name, ipaddress=''):
