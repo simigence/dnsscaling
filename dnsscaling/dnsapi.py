@@ -14,7 +14,7 @@ import sys
 
 class DnsMeApi(object):
 
-    def __init__(self, test_mode: bool=False):
+    def __init__(self, test_mode=False):
 
         self.url = 'https://api.dnsmadeeasy.com/V2.0/dns/managed'
 
@@ -31,11 +31,11 @@ class DnsMeApi(object):
         self.apikey = creds['apikey']
 
     @staticmethod
-    def _get_str_time() -> str:
+    def _get_str_time():
         return datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
 
     @staticmethod
-    def _get_dns_hash(message: str, key: str) -> str:
+    def _get_dns_hash(message, key):
         return hmac.new(key.encode('utf-8'), message.encode('utf-8'), hashlib.sha1).hexdigest()
 
     def _create_headers(self):
@@ -51,7 +51,7 @@ class DnsMeApi(object):
 
         return headers
 
-    def _get(self, url: str, sub: str=''):
+    def _get(self, url, sub=''):
 
         headers = self._create_headers()
 
@@ -64,7 +64,7 @@ class DnsMeApi(object):
             return content[sub]
         return content
 
-    def _post(self, url: str, data: dict, sub: str=''):
+    def _post(self, url, data, sub=''):
 
         headers = self._create_headers()
         r = requests.post(url, data=json.dumps(data).encode('utf-8'), headers=headers)
@@ -77,7 +77,7 @@ class DnsMeApi(object):
             return content['sub']
         return content
 
-    def _delete(self, url: str):
+    def _delete(self, url):
 
         headers = self._create_headers()
         r = requests.delete(url, headers=headers)
@@ -89,7 +89,7 @@ class DnsMeApi(object):
     def _get_account_data(self) -> list:
         return self._get(self.url, sub='data')
 
-    def _get_site_id(self, site: str) -> str:
+    def _get_site_id(self, site) -> str:
 
         data = self._get_account_data()
 
@@ -99,7 +99,7 @@ class DnsMeApi(object):
 
         return ''
 
-    def _get_records(self, site_id: str, type: str='', name: str='', value: str=''):
+    def _get_records(self, site_id, type='', name='', value=''):
 
         targurl = self.url + f'/{site_id}/records'
 
@@ -119,7 +119,7 @@ class DnsMeApi(object):
             ret_list.append(x)
         return ret_list
 
-    def add_a_record(self, site: str, name: str, ipaddress: str, ttl: int=300):
+    def add_a_record(self, site, name, ipaddress, ttl=300):
         """
         Add an A record to the site with name and ipaddress.
 
@@ -135,7 +135,7 @@ class DnsMeApi(object):
         targurl = self.url + f'/{site_id}/records/'
         self._post(targurl, data)
 
-    def delete_a_record(self, site: str, name: str, ipaddress: str=''):
+    def delete_a_record(self, site, name, ipaddress=''):
         """
         Delete an A record from site.
 
@@ -175,7 +175,7 @@ def get_aws_ip():
     return aws_ip
 
 
-def get_domain(fulldomain: str) -> tuple:
+def get_domain(fulldomain):
     """Split the full domain into subdomain and domain"""
     subdomain = fulldomain.split('.')[0]
     domain = '.'.join(fulldomain.split('.')[1:])
