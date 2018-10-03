@@ -207,10 +207,12 @@ def run_dnsscaling():
 
     if args.add_record:
         subdomain, domain = get_domain(args.add_record)
+        print("ADDING", domain, subdomain, D.ipaddress)
         D.add_a_record(domain, subdomain, D.ipaddress)
 
     elif args.delete_record:
         subdomain, domain = get_domain(args.delete_record)
+        print("DELETING", domain, subdomain, D.ipaddress)
         D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
 
 
