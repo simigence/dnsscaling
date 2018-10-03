@@ -99,6 +99,7 @@ class DnsMeApi(object):
         data = self._get_account_data()
 
         for d in data:
+            print(d)
             if d['name'] == site:
                 return str(d['id'])
 
@@ -171,7 +172,7 @@ class DnsMeApi(object):
             raise Exception('No id found for name or name and ipaddress')
 
         targurl = self.url + '/' + str(site_id) + '/records/' + str(name_id)
-        self._delete(targurl)
+        #self._delete(targurl)
 
 
 def get_aws_ip():
@@ -222,4 +223,4 @@ def run_dnsscaling():
 if __name__ == '__main__':
 
     D = DnsMeApi(test_mode=True)
-    D.delete_a_record('simpa.io', 'junkapi', '54.245.30.178')
+    D.delete_a_record('simpa.io', 'junk2', '54.245.30.178')
