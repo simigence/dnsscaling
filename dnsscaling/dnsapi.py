@@ -20,7 +20,7 @@ class DnsMeApi(object):
 
         self.ipaddress = None
         if not test_mode:
-            self.ipaddress = get_aws_ip()
+            self.ipaddress = str(get_aws_ip())
             if not self.ipaddress:
                 raise Exception('Could not find ip address')
 
