@@ -166,7 +166,7 @@ class DnsMeApi(object):
             raise Exception('No id found for name or name and ipaddress')
 
         targurl = self.url + '/' + str(site_id) + '/records/' + str(name_id)
-        #self._delete(targurl)
+        self._delete(targurl)
 
 
 def get_aws_ip():
