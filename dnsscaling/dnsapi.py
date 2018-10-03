@@ -214,9 +214,3 @@ def run_dnsscaling():
         subdomain, domain = get_domain(args.delete_record)
         print("DELETING", domain, subdomain, D.ipaddress)
         D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
-
-
-if __name__ == '__main__':
-
-    D = DnsMeApi(test_mode=True)
-    D.delete_a_record('simpa.io', 'junk2', '54.245.30.178')
