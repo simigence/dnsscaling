@@ -55,6 +55,7 @@ class DnsMeApi(object):
 
         headers = self._create_headers()
 
+        print("GET:", url)
         r = requests.get(url, headers=headers)
         if r.status_code != 200 and r.status_code != 201:
             print('Error:', r)
@@ -150,7 +151,8 @@ class DnsMeApi(object):
         """
 
         site_id = self._get_site_id(site)
-        print("Found site_id", site_id)
+        if not site_id:
+            raise Exception("No site id found for", site)
         r = self._get_records(site_id, type='A', name=name)
 
         name_id = None
