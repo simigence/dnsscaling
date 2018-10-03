@@ -181,8 +181,8 @@ def get_aws_ip():
 
 def get_domain(fulldomain):
     """Split the full domain into subdomain and domain"""
-    subdomain = fulldomain.split('.')[0]
-    domain = '.'.join(fulldomain.split('.')[1:])
+    domain = '.'.join(fulldomain.split('.')[-2:])
+    subdomain = '.'.join(fulldomain.split('.')[0:-2])
     return subdomain, domain
 
 
