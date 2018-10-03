@@ -24,7 +24,7 @@ class DnsMeApi(object):
             if not self.ipaddress:
                 raise Exception('Could not find ip address')
 
-        path = os.path.join(os.environ["HOME"], 'efs/credentials/dnsmadeeasy/dme_credentials.json')
+        path = '/home/ec2-user/efs/credentials/dnsmadeeasy/dme_credentials.json'
 
         creds = json.loads(open(path, 'r').read().strip())
         self.apisecret = creds['apisecret']

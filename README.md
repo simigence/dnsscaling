@@ -8,7 +8,8 @@ Configured by adding appropriate commands to the user-data text.
 Needed commands in AWS user-data file to add the ipaddress of the server as an A record
 
     curl -O https://bootstrap.pypa.io/get-pip.py
-    sudo yum install git
+    sudo python get-pip.py --user
+    sudo yum install -y git
     sudo ~/.local/bin/pip install git+https://github.com/simigence/dnsscaling.git
     dnsscaling -a <subdomain>.<domain.ending>
 
@@ -24,3 +25,8 @@ The script uses the AWS EFS file system to store dnsmadeeasy credentials. The pa
 
 must exist and hold a json of ```{"apikey': "<apikey>",  "apisecret": "<apisecret>"}``` needed
 to access the dnsmadeeasy api.
+
+
+# needed in /etc/dnsscalingdelete
+    # /usr/local/bin/dnsscaling -d junktmp.simpa.io
+# sudo ln -s /etc/dnsscalingdelete /etc/rc0.d/S01dnsscalingdelete
