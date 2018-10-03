@@ -55,10 +55,8 @@ class DnsMeApi(object):
 
         headers = self._create_headers()
 
-        print("GET:", url)
         r = requests.get(url, headers=headers)
         if r.status_code != 200 and r.status_code != 201:
-            print('Error:', r)
             s = 'Code ' + str(r.status_code) + ':' + str(r.text)
             raise Exception(s)
 
@@ -72,7 +70,6 @@ class DnsMeApi(object):
         headers = self._create_headers()
         r = requests.post(url, data=json.dumps(data).encode('utf-8'), headers=headers)
         if r.status_code != 200 and r.status_code != 201:
-            print(r)
             s = 'Code ' + str(r.status_code) + ' : Something went wrong with POST'
             raise Exception(s)
 
@@ -86,7 +83,6 @@ class DnsMeApi(object):
         headers = self._create_headers()
         r = requests.delete(url, headers=headers)
         if r.status_code != 200 and r.status_code != 201:
-            print(r)
             s = 'Code ' + str(r.status_code)
             raise Exception(s)
         return r
@@ -99,8 +95,7 @@ class DnsMeApi(object):
         data = self._get_account_data()
 
         for d in data:
-            print(site, d)
-            if str(d['name']) == str(site):
+            if d['name'] == site:
                 return str(d['id'])
 
         return ''
@@ -109,7 +104,6 @@ class DnsMeApi(object):
 
         targurl = self.url + '/' + str(site_id) + '/records'
 
-        print("Getting:", targurl)
         content = self._get(targurl, sub='data')
 
         if not type and not name and not value:
@@ -216,7 +210,7 @@ def run_dnsscaling():
         D.add_a_record(domain, subdomain, D.ipaddress)
 
     elif args.delete_record:
-        subdomain, domain = get_domain(args.add_record)
+        subdomain, domain = get_domain(args.delete_record)
         D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
 
 
