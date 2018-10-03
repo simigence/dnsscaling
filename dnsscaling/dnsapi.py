@@ -57,6 +57,7 @@ class DnsMeApi(object):
 
         r = requests.get(url, headers=headers)
         if r.status_code != 200 and r.status_code != 201:
+            print('Error:', r)
             s = 'Code ' + str(r.status_code) + ':' + str(r.text)
             raise Exception(s)
 
@@ -106,6 +107,7 @@ class DnsMeApi(object):
 
         targurl = self.url + '/' + str(site_id) + '/records'
 
+        print("Getting:", targurl)
         content = self._get(targurl, sub='data')
 
         if not type and not name and not value:
@@ -148,6 +150,7 @@ class DnsMeApi(object):
         """
 
         site_id = self._get_site_id(site)
+        print("Found site_id", site_id)
         r = self._get_records(site_id, type='A', name=name)
 
         name_id = None
@@ -217,4 +220,4 @@ def run_dnsscaling():
 if __name__ == '__main__':
 
     D = DnsMeApi(test_mode=True)
-    D.delete_a_record('simpa.io', 'apijunk2', '10.0.0.6')
+    D.delete_a_record('simpa.io', 'junkapi', '54.245.30.178')
