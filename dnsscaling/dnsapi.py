@@ -99,8 +99,8 @@ class DnsMeApi(object):
         data = self._get_account_data()
 
         for d in data:
-            print(d)
-            if d['name'] == site:
+            print(site, d)
+            if str(d['name']) == str(site):
                 return str(d['id'])
 
         return ''
