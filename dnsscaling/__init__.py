@@ -2,8 +2,7 @@
 from string import Template
 
 _init_script = Template(
-'''
-#!/bin/sh
+'''#!/bin/sh
 # chkconfig: 345 99 1
 # Required-Start:    networking
 # Required-Stop:     networking
@@ -47,4 +46,4 @@ exit 0
 
 def write_init_script(url, path):
     with open(path + 'dnsscalingdelete', 'w') as f:
-        f.write(_init_script.substitute({'url': url}))
+        f.write(_init_script.substitute({'url': url}).strip())
