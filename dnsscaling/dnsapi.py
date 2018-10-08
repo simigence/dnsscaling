@@ -11,6 +11,8 @@ import os
 import requests
 import sys
 
+from dnsscaling import write_init_script
+
 
 class DnsMeApi(object):
 
@@ -193,13 +195,21 @@ def run_dnsscaling():
     parser.add_argument('-a', '--add_record', type=str, default='', help="Add an A record associated with the domain")
     parser.add_argument('-d', '--delete_record', type=str, default='', help="Delete an A record "
                                                                             "associated with the domain")
+    parser.add_argument('-i', '--init_script', type=str, default='', help="Create and store the init script for the"
+                                                                          "domain")
+
 
     if not len(sys.argv) > 1:
         parser.print_help()
         sys.exit()
 
     args = parser.parse_args()
-    if (not args.add_record and not args.delete_record) or (args.add_record and args.delete_record):
+    if args.init_script:
+        # write new script
+        write_init_script(args.init_script, '/etc/init.d/')
+        sys.exit()
+
+    elif (not args.add_record and not args.delete_record) or (args.add_record and args.delete_record):
         parser.print_help()
         sys.exit()
 
