@@ -13,23 +13,21 @@ _init_script = Template(
 # Source function library.
 . /etc/rc.d/init.d/dnsscalingdelete
 
-LOCKFILE=/var/lock/subsys/dnsscalingdelete
-
 start(){
-    touch $LOCKFILE
+    touch /var/lock/subsys/dnsscalingdelete
 }
 stop(){
     sudo /usr/local/bin/dnsscaling -d $url
     sleep 3	
-    rm -f $LOCKFILE
+    rm -f /var/lock/subsys/dnsscalingdelete
 }
 
-restart() {
+restart(){
     stop
     start
 }
 
-case $1 in
+case $$1 in
 start)
         start
         ;;
