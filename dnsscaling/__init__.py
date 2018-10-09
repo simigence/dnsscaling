@@ -4,17 +4,14 @@ from string import Template
 _init_script = Template(
 '''#!/bin/sh
 # chkconfig: 345 99 1
-# Required-Start:    networking
-# Required-Stop:     networking
-# Default-Start:     345
-# Default-Stop:      0126
-
-# Source function library.
-. /etc/rc.d/init.d/dnsscalingdelete
+# description: Script for DNS deregistration
 
 start(){
     touch /var/lock/subsys/dnsscalingdelete
+    sudo /usr/local/bin/dnsscaling -a $url
+    sleep 3
 }
+
 stop(){
     sudo /usr/local/bin/dnsscaling -d $url
     sleep 3	
