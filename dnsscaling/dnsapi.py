@@ -122,7 +122,7 @@ class DnsMeApi(object):
             ret_list.append(x)
         return ret_list
 
-    def add_a_record(self, site, name, ipaddress, ttl=300):
+    def add_a_record(self, site, name, ipaddress, ttl=30):
         """
         Add an A record to the site with name and ipaddress.
 
