@@ -16,7 +16,7 @@ from dnsscaling import write_init_script
 
 class DnsMeApi(object):
 
-    def __init__(self, test_mode=False):
+    def __init__(self, test_mode=False, credentials_json=''):
 
         self.url = 'https://api.dnsmadeeasy.com/V2.0/dns/managed'
 
@@ -26,9 +26,11 @@ class DnsMeApi(object):
             if not self.ipaddress:
                 raise Exception('Could not find ip address')
 
-        path = '/home/ec2-user/efs/credentials/dnsmadeeasy/dme_credentials.json'
+        if not credentials_json:
+            # hardcoded path where credentials must be stored
+            credentials_json = '/home/ec2-user/efs/credentials/dnsmadeeasy/dme_credentials.json'
 
-        creds = json.loads(open(path, 'r').read().strip())
+        creds = json.loads(open(credentials_json, 'r').read().strip())
         self.apisecret = creds['apisecret']
         self.apikey = creds['apikey']
 
@@ -122,7 +124,7 @@ class DnsMeApi(object):
             ret_list.append(x)
         return ret_list
 
-    def add_a_record(self, site, name, ipaddress, ttl=30):
+    def add_a_record(self, site, name, ipaddress, ttl=30, robust=True):
         """
         Add an A record to the site with name and ipaddress.
 
@@ -130,13 +132,26 @@ class DnsMeApi(object):
         :param name:
         :param ipaddress:
         :param ttl:
+        :param robust: will check that the cert exists after an add
         :return:
         """
 
         data = {'name': name, 'type': 'A', 'value': ipaddress, 'gtdLocation': 'DEFAULT', 'ttl': ttl}
         site_id = self._get_site_id(site)
         targurl = self.url + '/' + str(site_id) + '/records/'
-        self._post(targurl, data)
+        try:
+            self._post(targurl, data)
+        except:
+            if robust:
+                self._post(targurl, data)
+            else:
+                raise
+
+        if robust:
+            # verify
+            name_id = self._get_a_record_name(site, name, ipaddress)
+            if not name_id:
+                self._post(targurl, data)
 
     def delete_a_record(self, site, name, ipaddress=''):
         """
@@ -150,13 +165,21 @@ class DnsMeApi(object):
         site_id = self._get_site_id(site)
         if not site_id:
             raise Exception("No site id found for", site)
+
+        name_id = self._get_a_record_name(site, name, ipaddress)
+
+        targurl = self.url + '/' + str(site_id) + '/records/' + str(name_id)
+        self._delete(targurl)
+
+    def _get_a_record_name(self, site_id, name, ipaddress):
+
         r = self._get_records(site_id, type='A', name=name)
 
         name_id = None
         if len(r) > 1 and not ipaddress:
             raise Exception('More than one IP address found for the record name, specify an ip address to delete.')
         elif len(r) == 0:
-            s = 'No A records found for' + site + 'with' + name
+            s = 'No A records found with' + name + 'for site id' + site_id
             raise Exception(s)
         elif len(r) == 1:
             name_id = r[0]['id']
@@ -167,8 +190,7 @@ class DnsMeApi(object):
         if not name_id:
             raise Exception('No id found for name or name and ipaddress')
 
-        targurl = self.url + '/' + str(site_id) + '/records/' + str(name_id)
-        self._delete(targurl)
+        return name_id
 
 
 def get_aws_ip():
