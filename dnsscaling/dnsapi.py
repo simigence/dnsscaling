@@ -166,7 +166,7 @@ class DnsMeApi(object):
         if not site_id:
             raise Exception("No site id found for", site)
 
-        name_id = self._get_a_record_name(site, name, ipaddress)
+        name_id = self._get_a_record_name(site_id, name, ipaddress)
 
         targurl = self.url + '/' + str(site_id) + '/records/' + str(name_id)
         self._delete(targurl)
