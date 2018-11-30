@@ -33,9 +33,6 @@ class SslCredentials(object):
         self.pem_files = ['fullchain.pem', 'privkey.pem', 'cert.pem', 'chain.pem']
         self.pem_1_files = ['fullchain1.pem', 'privkey1.pem', 'cert1.pem', 'chain1.pem']
 
-        with open('/home/ec2-user/tmp1.txt', 'w') as f:
-            f.write('here1')
-
         if os.path.isdir(self.efs_cert_path):
 
             if not all([os.path.exists(os.path.join(self.efs_cert_path, pem)) for pem in self.pem_files]):
@@ -105,9 +102,6 @@ class SslCredentials(object):
 
     def copy_link_efs(self):
 
-        with open('/home/ec2-user/tmp.txt', 'w') as f:
-            f.write(self._cat_copy_str(parenth=False))
-
         # copy and symlink all files in live directory
         for i, pem in enumerate(self.pem_files):
 
@@ -144,8 +138,8 @@ class SslCredentials(object):
         else:
             cat_copy = ''
 
-        cat_copy += "sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > ~/haproxy.pem && " \
-                   "sudo mv ~/haproxy.pem {1}simpa/haproxy.pem".format(self.url, self.lets_encrypt_path)
+        cat_copy += "sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > /home/ec2-user/haproxy.pem && " \
+                   "sudo cp /home/ec2-user/haproxy.pem {1}simpa/haproxy.pem".format(self.url, self.lets_encrypt_path)
 
         for pem in self.pem_files:
             cat_copy += " && sudo cp {1}live/{0}/{3} {2}{0}".format(
