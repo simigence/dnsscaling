@@ -133,9 +133,16 @@ class SslCredentials(object):
 
     def _cat_copy_str(self):
 
-        cat_copy = "\"sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > " \
-                   "{1}simpa/haproxy.pem && sudo cp {1}live/{0}/*.pem {2}{0}\"".format(
-            self.url, self.lets_encrypt_path, self.efs_path)
+        cat_copy = "\""
+
+        cat_copy += "sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > haproxy.pem && " \
+                   "sudo mv haproxy.pem {1}simpa/haproxy.pem".format(self.url, self.lets_encrypt_path)
+
+        for pem in self.pem_files:
+            cat_copy += " && sudo cp {1}live/{0}/{3} {2}{0}".format(
+                self.url, self.lets_encrypt_path, self.efs_path, pem)
+
+        cat_copy += "\""
 
         return cat_copy
 
