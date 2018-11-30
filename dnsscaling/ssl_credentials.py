@@ -135,8 +135,8 @@ class SslCredentials(object):
 
         cat_copy = "\""
 
-        cat_copy += "sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > haproxy.pem && " \
-                   "sudo mv haproxy.pem {1}simpa/haproxy.pem".format(self.url, self.lets_encrypt_path)
+        cat_copy += "sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > ~/haproxy.pem && " \
+                   "sudo mv ~/haproxy.pem {1}simpa/haproxy.pem".format(self.url, self.lets_encrypt_path)
 
         for pem in self.pem_files:
             cat_copy += " && sudo cp {1}live/{0}/{3} {2}{0}".format(
@@ -161,3 +161,12 @@ def run_sslcredentials():
         sys.exit()
 
     ssl = SslCredentials(args.url, args.email)
+
+
+if __name__ == '__main__':
+
+    url = 'logs.simpa.io'
+    lets_encrypt_path = '/etc/letsencrypt/'
+    cat_copy = "sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > haproxy.pem && " \
+                "sudo mv haproxy.pem {1}simpa/haproxy.pem".format(url, lets_encrypt_path)
+    print(cat_copy)
