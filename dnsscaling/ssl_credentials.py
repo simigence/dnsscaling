@@ -33,6 +33,9 @@ class SslCredentials(object):
         self.pem_files = ['fullchain.pem', 'privkey.pem', 'cert.pem', 'chain.pem']
         self.pem_1_files = ['fullchain1.pem', 'privkey1.pem', 'cert1.pem', 'chain1.pem']
 
+        with open('/home/ec2-user/tmp1.txt', 'w') as f:
+            f.write('here1')
+
         if os.path.isdir(self.efs_cert_path):
 
             if not all([os.path.exists(os.path.join(self.efs_cert_path, pem)) for pem in self.pem_files]):
@@ -102,6 +105,9 @@ class SslCredentials(object):
 
     def copy_link_efs(self):
 
+        with open('/home/ec2-user/tmp.txt', 'w') as f:
+            f.write(self._cat_copy_str(parenth=False))
+
         # copy and symlink all files in live directory
         for i, pem in enumerate(self.pem_files):
 
@@ -117,8 +123,6 @@ class SslCredentials(object):
             os.symlink(archive_sym, live)
 
         # prep command for haproxy and make sure efs in sync
-        with open('~/tmp.txt', 'w') as f:
-            f.write(self._cat_copy_str(parenth=False))
         self._execute_cmd(self._cat_copy_str(parenth=False))
         # stop haproxy
         self._execute_cmd(self._stop_haproxy_str())
