@@ -132,19 +132,19 @@ class SslCredentials(object):
             self._write('link...{0}...{1}...{2}'.format(pem, archive_sym, live))
             os.symlink(archive_sym, live)
 
-        self._write('link cat: {0}'.format(self._cat_copy_str(parenth=False)))
         # prep command for haproxy and make sure efs in sync
         self._execute_cmd(self._cat_copy_str(parenth=False))
         # stop haproxy
-        self._write('link proxy: {0}'.format(self._stop_haproxy_str()))
         self._execute_cmd(self._stop_haproxy_str())
 
     def _execute_cmd(self, cmd):
 
         print("EXECUTE: {0}".format(cmd))
+        self._write("Execute: {0}".format(cmd))
         if not self.test_mode:
             args = shlex.split(cmd)
             result = subprocess.call(args)
+            self._write("Result: {0}".format(result))
 
     def _stop_haproxy_str(self):
         return "\"docker stop $(docker ps | grep haproxy | awk '{0}print $1{1}')\"".format('{', '}')
