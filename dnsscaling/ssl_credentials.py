@@ -33,15 +33,21 @@ class SslCredentials(object):
         self.pem_files = ['fullchain.pem', 'privkey.pem', 'cert.pem', 'chain.pem']
         self.pem_1_files = ['fullchain1.pem', 'privkey1.pem', 'cert1.pem', 'chain1.pem']
 
+        self._write('here1')
         if os.path.isdir(self.efs_cert_path):
 
+            self._write('here2')
+
             if not all([os.path.exists(os.path.join(self.efs_cert_path, pem)) for pem in self.pem_files]):
+                self._write('here3a')
                 # something is wrong with efs directory so delete to reset certs
                 shutil.rmtree(self.efs_cert_path)
                 os.makedirs(self.efs_cert_path)
                 self.init_cert()
+                self._write('here3b')
 
             elif os.path.isdir(self.live_cert_path):
+                self._write('here4')
 
                 # check if all files are the same
                 same = True
@@ -69,10 +75,13 @@ class SslCredentials(object):
                     self.copy_link_efs()
 
             else:
+                self._write('here5a')
                 # if local doesn't exist create directory and copy all files
                 os.makedirs(self.archive_cert_path)
                 os.makedirs(self.live_cert_path)
+                self._write('here5b')
                 self.copy_link_efs()
+                self._write('here5c')
 
         elif os.path.isdir(self.live_cert_path):
 
@@ -89,18 +98,24 @@ class SslCredentials(object):
 
             self.init_cert()
 
-        cmd = "/certbot-auto renew --pre-hook {0} --post-hook {1}".format(self._stop_haproxy_str(),
-                                                                          self._cat_copy_str())
+        cmd = "/certbot-auto renew --standalone -n --agree-tos --debug --pre-hook {1} --post-hook {2}" \
+              "".format(self.url, self._stop_haproxy_str(), self._cat_copy_str())
         self._execute_cmd(cmd)
+
+    def _write(self, txt):
+        with open('/home/ec2-user/tmp.txt', 'a') as f:
+            f.write(txt)
 
     def init_cert(self):
 
         # need to run initial creation and copy of certification
-        cmd = "/certbot-auto certonly --standalone --agree-tos -m {2} -n -d " \
-              "{0} --debug && {1}".format(self.url, self._cat_copy_str(), self.email)
+        cmd = "/certbot-auto certonly --standalone --agree-tos -m {2} -n --debug -d {0} && {1}" \
+              "".format(self.url, self._cat_copy_str(), self.email)
         self._execute_cmd(cmd)
 
     def copy_link_efs(self):
+
+        self._write('link1')
 
         # copy and symlink all files in live directory
         for i, pem in enumerate(self.pem_files):
@@ -114,11 +129,14 @@ class SslCredentials(object):
                 os.makedirs(self.live_cert_path)
 
             archive_sym = '../../archive/' + self.url + '/' + self.pem_1_files[i]
+            self._write('link...{0}...{1}...{2}'.format(pem, archive_sym, live))
             os.symlink(archive_sym, live)
 
+        self._write('link cat: {0}'.format(self._cat_copy_str(parenth=False)))
         # prep command for haproxy and make sure efs in sync
         self._execute_cmd(self._cat_copy_str(parenth=False))
         # stop haproxy
+        self._write('link proxy: {0}'.format(self._stop_haproxy_str())
         self._execute_cmd(self._stop_haproxy_str())
 
     def _execute_cmd(self, cmd):
