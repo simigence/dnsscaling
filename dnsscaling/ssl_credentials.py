@@ -104,7 +104,7 @@ class SslCredentials(object):
 
     def _write(self, txt):
         with open('/home/ec2-user/tmp.txt', 'a') as f:
-            f.write(txt)
+            f.write(txt + '\n')
 
     def init_cert(self):
 
