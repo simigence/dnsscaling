@@ -19,7 +19,7 @@ class SslCredentials(object):
 
         # hardcoded defaults
         if not efs_path:
-            efs_path = '/home/ec2-user/efs/letsencryt/'
+            efs_path = '/home/ec2-user/efs/letsencrypt/'
         if not lets_encrypt_path:
             lets_encrypt_path = '/etc/letsencrypt/'
         self.efs_path = efs_path
@@ -67,16 +67,16 @@ class SslCredentials(object):
                 os.makedirs(self.archive_cert_path)
                 self.copy_link()
 
-        elif os.path.isdir(self.archive_cert_path):
+        elif os.path.isdir(self.live_cert_path):
 
             # make the directory and copy contents
             os.makedirs(self.efs_cert_path)
 
             # need to copy the other direction
-            for pem in self.pem_files:
+            for i, pem in enumerate(self.pem_files):
                 src = os.path.join(self.efs_cert_path, pem)
-                archive = os.path.join(self.archive_cert_path, pem)
-                shutil.copy2(archive, src)
+                live = os.path.join(self.live_cert_path, pem)
+                shutil.copy2(live, src)
 
         else:
 
