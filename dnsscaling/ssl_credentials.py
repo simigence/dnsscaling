@@ -32,6 +32,7 @@ class SslCredentials(object):
         self.pem_files = ['fullchain.pem', 'privkey.pem', 'cert.pem', 'chain.pem']
         self.pem_1_files = ['fullchain1.pem', 'privkey1.pem', 'cert1.pem', 'chain1.pem']
 
+        copy_certs_to_efs = False
         self.run_certbot = True
         if os.path.isdir(self.efs_cert_path):
 
@@ -48,6 +49,10 @@ class SslCredentials(object):
 
                     src = os.path.join(self.efs_cert_path, pem)
                     archive = os.path.join(self.archive_cert_path, self.pem_1_files[i])
+
+                    if not os.path.exists(src) or not os.path.exists(archive):
+                        same = False
+                        break
 
                     with open(src, 'rb') as f1:
                         with open(archive, 'rb') as f2:
@@ -74,25 +79,33 @@ class SslCredentials(object):
 
             # make the directory and copy contents
             os.makedirs(self.efs_cert_path)
+            copy_certs_to_efs = True
 
-            # need to copy the other direction
+        else:
+
+            self.init_cert()
+            copy_certs_to_efs = True
+
+        if copy_certs_to_efs:
+
+            # need to copy live certs to efs
             for i, pem in enumerate(self.pem_files):
                 src = os.path.join(self.efs_cert_path, pem)
                 live = os.path.join(self.live_cert_path, pem)
                 shutil.copy2(live, src)
 
-        else:
-
-            # need to run initial creation and copy of certification
-            cmd = "/certbot-auto certonly --standalone --agree-tos -m soren@simigence.com -n -d " \
-                  "{0} --debug && {1}".format(self.url, self._cat_copy())
-            print("EXECUTE: {0}".format(cmd))
-            if not self.test_mode:
-                args = shlex.split(cmd)
-                result = subprocess.call(args)
-
         if self.run_certbot:
             self.system_exec_certbot()
+
+    def init_cert(self):
+
+        # need to run initial creation and copy of certification
+        cmd = "/certbot-auto certonly --standalone --agree-tos -m soren@simigence.com -n -d " \
+              "{0} --debug && {1}".format(self.url, self._cat_copy())
+        print("EXECUTE: {0}".format(cmd))
+        if not self.test_mode:
+            args = shlex.split(cmd)
+            result = subprocess.call(args)
 
     def copy_link(self):
 
