@@ -117,7 +117,7 @@ class SslCredentials(object):
             os.symlink(archive_sym, live)
 
         # prep command for haproxy and make sure efs in sync
-        self._execute_cmd(self._cat_copy_str())
+        self._execute_cmd(self._cat_copy_str(parenth=False))
         # stop haproxy
         self._execute_cmd(self._stop_haproxy_str())
 
@@ -131,9 +131,12 @@ class SslCredentials(object):
     def _stop_haproxy_str(self):
         return "\"docker stop $(docker ps | grep haproxy | awk '{0}print $1{1}')\"".format('{', '}')
 
-    def _cat_copy_str(self):
+    def _cat_copy_str(self, parenth=True):
 
-        cat_copy = "\""
+        if parenth:
+            cat_copy = "\""
+        else:
+            cat_copy = ''
 
         cat_copy += "sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > ~/haproxy.pem && " \
                    "sudo mv ~/haproxy.pem {1}simpa/haproxy.pem".format(self.url, self.lets_encrypt_path)
@@ -142,7 +145,8 @@ class SslCredentials(object):
             cat_copy += " && sudo cp {1}live/{0}/{3} {2}{0}".format(
                 self.url, self.lets_encrypt_path, self.efs_path, pem)
 
-        cat_copy += "\""
+        if parenth:
+            cat_copy += "\""
 
         return cat_copy
 
