@@ -57,7 +57,9 @@ class SslCredentials(object):
 
                 if not same:
                     shutil.rmtree(self.archive_cert_path)
+                    shutil.rmtree(self.live_cert_path)
                     os.makedirs(self.archive_cert_path)
+                    os.makedirs(self.live_cert_path)
                     self.copy_link()
                 else:
                     self.run_certbot = False
@@ -65,6 +67,7 @@ class SslCredentials(object):
             else:
                 # if local doesn't exist create directory and copy all files
                 os.makedirs(self.archive_cert_path)
+                os.makedirs(self.live_cert_path)
                 self.copy_link()
 
         elif os.path.isdir(self.live_cert_path):
