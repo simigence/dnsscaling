@@ -117,6 +117,8 @@ class SslCredentials(object):
             os.symlink(archive_sym, live)
 
         # prep command for haproxy and make sure efs in sync
+        with open('~/tmp.txt', 'w') as f:
+            f.write(self._cat_copy_str(parenth=False))
         self._execute_cmd(self._cat_copy_str(parenth=False))
         # stop haproxy
         self._execute_cmd(self._stop_haproxy_str())
