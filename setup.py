@@ -22,7 +22,8 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'dnsscaling=dnsscaling.dnsapi:run_dnsscaling'
+            'dnsscaling=dnsscaling.dnsapi:run_dnsscaling',
+            'dnscertbot=dnsscaling.ssl_credentials:run_sslcredentials',
         ],
     },
 )
