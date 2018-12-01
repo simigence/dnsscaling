@@ -135,7 +135,7 @@ class SslCredentials(object):
         # prep command for haproxy and make sure efs in sync
         self._execute_cmd(self._cat_copy_str(parenth=False))
         # stop haproxy
-        self._execute_cmd(self._stop_haproxy_str())
+        self._execute_cmd(self._stop_haproxy_str(parenth=False))
 
     def _execute_cmd(self, cmd):
 
