@@ -146,8 +146,19 @@ class SslCredentials(object):
             result = subprocess.call(args)
             self._write("Result: {0}".format(result))
 
-    def _stop_haproxy_str(self):
-        return "\"docker stop $(docker ps | grep haproxy | awk '{0}print $1{1}')\"".format('{', '}')
+    def _stop_haproxy_str(self, parenth=True):
+
+        if parenth:
+            proxy = "\""
+        else:
+            proxy = ''
+
+        proxy += "docker stop $(docker ps | grep haproxy | awk '{0}print $1{1}')".format('{', '}')
+
+        if parenth:
+            proxy += "\""
+
+        return proxy
 
     def _cat_copy_str(self, parenth=True):
 
