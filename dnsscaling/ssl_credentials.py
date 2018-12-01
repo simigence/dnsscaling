@@ -146,8 +146,9 @@ class SslCredentials(object):
         print("EXECUTE: {0}".format(cmd))
         self._write("Execute: {0}".format(cmd))
         if not self.test_mode:
-            args = shlex.split(cmd)
-            result = subprocess.call(args)
+            #args = shlex.split(cmd)
+            #result = subprocess.call(args)
+            result = subprocess.Popen(cmd)
             self._write("Result: {0}".format(result))
 
     def _stop_haproxy_str(self, parenth=True):
@@ -207,3 +208,6 @@ if __name__ == '__main__':
     cat_copy = "sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > haproxy.pem && " \
                 "sudo mv haproxy.pem {1}simpa/haproxy.pem".format(url, lets_encrypt_path)
     print(cat_copy)
+    x = 'cat /etc/letsencrypt/live/logs.simpa.io/fullchain.pem /etc/letsencrypt/live/logs.simpa.io/privkey.pem > /home/ec2-user/haproxy.pem'
+    args = shlex.split(x)
+    print(args)
