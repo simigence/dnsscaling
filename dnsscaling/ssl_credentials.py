@@ -149,7 +149,7 @@ class SslCredentials(object):
             #args = shlex.split(cmd)
             #result = subprocess.call(args)
             try:
-                result = subprocess.Popen(cmd)
+                result = subprocess.Popen(cmd, shell=True)
             except:
                 import traceback
                 self._write(traceback.format_exc())
