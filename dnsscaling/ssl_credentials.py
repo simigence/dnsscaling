@@ -132,6 +132,10 @@ class SslCredentials(object):
             self._write('link...{0}...{1}...{2}'.format(pem, archive_sym, live))
             os.symlink(archive_sym, live)
 
+        c = "cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > /home/ec2-user/haproxy.pem".format(self.url, self.lets_encrypt_path)
+        self._execute_cmd(c)
+        c = "cp /home/ec2-user/haproxy.pem {0}simpa/haproxy.pem".format(self.lets_encrypt_path)
+        self._execute_cmd(c)
         # prep command for haproxy and make sure efs in sync
         self._execute_cmd(self._cat_copy_str(parenth=False))
         # stop haproxy
