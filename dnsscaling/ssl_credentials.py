@@ -148,7 +148,12 @@ class SslCredentials(object):
         if not self.test_mode:
             #args = shlex.split(cmd)
             #result = subprocess.call(args)
-            result = subprocess.Popen(cmd)
+            try:
+                result = subprocess.Popen(cmd)
+            except:
+                import traceback
+                self._write(traceback.format_exc())
+                return
             self._write("Result: {0}".format(result))
 
     def _stop_haproxy_str(self, parenth=True):
