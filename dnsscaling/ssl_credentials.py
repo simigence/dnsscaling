@@ -127,6 +127,8 @@ class SslCredentials(object):
         if self._run_certbot:
             self._execute_cmd(cmd)
 
+        self.copy_link_efs()
+
     def copy_link_efs(self):
 
         self._write("copy_link")
