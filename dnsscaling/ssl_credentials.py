@@ -11,9 +11,11 @@ import sys
 
 class SslCredentials(object):
 
-    def __init__(self, url, email, efs_path='', lets_encrypt_path='', test_mode=False, debug_mode=False):
+    def __init__(self, url, email, efs_path='', lets_encrypt_path='', test_mode=False, debug_mode=False,
+                 run_certbot=True):
 
         self._debug = debug_mode
+        self._run_certbot = run_certbot
         self.url = url
         self.email = email
         self.test_mode = test_mode
@@ -104,14 +106,13 @@ class SslCredentials(object):
 
         cmd = "/certbot-auto renew --standalone -n --agree-tos --debug --pre-hook {1} --post-hook {2}" \
               "".format(self.url, self._stop_haproxy_str(), self._cat_copy_str())
-
         self._write(cmd)
-        if not self._debug:
+        if self._run_certbot:
             self._execute_cmd(cmd)
 
     def _write(self, txt):
 
-        if not self.test_mode and self._debug:
+        if self._debug:
             with open('/home/ec2-user/dnscert.log', 'a') as f:
                 f.write(txt + '\n')
         elif self.test_mode:
@@ -122,9 +123,8 @@ class SslCredentials(object):
         # need to run initial creation and copy of certification
         cmd = "/certbot-auto certonly --standalone --agree-tos -m {2} -n --debug -d {0} && {1}" \
               "".format(self.url, self._cat_copy_str(), self.email)
-
         self._write(cmd)
-        if not self._debug:
+        if self._run_certbot:
             self._execute_cmd(cmd)
 
     def copy_link_efs(self):
@@ -177,7 +177,7 @@ class SslCredentials(object):
         else:
             cat_copy = ''
 
-        cat_copy += "sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > /home/ec2-user/haproxy.pem" \
+        cat_copy += "sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > /home/ec2-user/haproxy.pem " \
                     "&& sudo mv /home/ec2-user/haproxy.pem {1}simpa/haproxy.pem" \
                     "".format(self.url, self.lets_encrypt_path)
 
@@ -199,6 +199,8 @@ def run_sslcredentials():
     parser.add_argument('-e', '--email', type=str, default='', help="Email for ssl initialization")
     parser.add_argument('--debug', action='store_true', default=False,
                         help="[flag] debug flag")
+    parser.add_argument('--nocert', action='store_false', default=True,
+                        help="[flag] Turn off running certbot-auto")
 
     args = parser.parse_args()
 
@@ -206,4 +208,4 @@ def run_sslcredentials():
         parser.print_help()
         sys.exit()
 
-    ssl = SslCredentials(args.url, args.email, debug_mode=args.debug)
+    ssl = SslCredentials(args.url, args.email, debug_mode=args.debug, run_certbot=args.nocert)
