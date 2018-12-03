@@ -12,9 +12,9 @@ import sys
 
 class SslCredentials(object):
 
-    def __init__(self, url, email, efs_path='', lets_encrypt_path='', test_mode=False):
+    def __init__(self, url, email, efs_path='', lets_encrypt_path='', test_mode=False, debug_mode=False):
 
-        self._debug = True
+        self._debug = debug_mode
         self.url = url
         self.email = email
         self.test_mode = test_mode
@@ -197,6 +197,8 @@ def run_sslcredentials():
 
     parser.add_argument('-u', '--url', type=str, default='', help="Domain url for ssl")
     parser.add_argument('-e', '--email', type=str, default='', help="Email for ssl initialization")
+    parser.add_argument('--debug', action='store_true', default=False,
+                        help="[flag] debug flag")
 
     args = parser.parse_args()
 
@@ -204,7 +206,7 @@ def run_sslcredentials():
         parser.print_help()
         sys.exit()
 
-    ssl = SslCredentials(args.url, args.email)
+    ssl = SslCredentials(args.url, args.email, debug_mode=args.debur)
 
 
 if __name__ == '__main__':
