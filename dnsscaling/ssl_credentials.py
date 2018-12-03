@@ -87,22 +87,24 @@ class SslCredentials(object):
                 os.makedirs(self.live_cert_path)
                 self.copy_link_efs()
 
-        elif os.path.isdir(self.live_cert_path):
-
-            self._write('path outside live')
-
+        else:
             # make the directory and copy contents
             os.makedirs(self.efs_cert_path)
 
-            # need to copy live certs to efs
-            for i, pem in enumerate(self.pem_files):
-                src = os.path.join(self.efs_cert_path, pem)
-                live = os.path.join(self.live_cert_path, pem)
-                shutil.copy2(live, src)
+            if os.path.isdir(self.live_cert_path):
 
-        else:
+                self._write('path outside live')
 
-            self.init_cert()
+
+                # need to copy live certs to efs
+                for i, pem in enumerate(self.pem_files):
+                    src = os.path.join(self.efs_cert_path, pem)
+                    live = os.path.join(self.live_cert_path, pem)
+                    shutil.copy2(live, src)
+
+            else:
+
+                self.init_cert()
 
         cmd = "/certbot-auto renew --standalone -n --agree-tos --debug --pre-hook {1} --post-hook {2}" \
               "".format(self.url, self._stop_haproxy_str(), self._cat_copy_str())
@@ -126,7 +128,6 @@ class SslCredentials(object):
         self._write(cmd)
         if self._run_certbot:
             self._execute_cmd(cmd)
-        # self.copy_link_efs()
 
     def copy_link_efs(self):
 
