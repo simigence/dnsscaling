@@ -95,6 +95,7 @@ class SslCredentials(object):
 
         cmd = "/certbot-auto renew --standalone -n --agree-tos --debug --pre-hook {1} --post-hook {2}" \
               "".format(self.url, self._stop_haproxy_str(), self._cat_copy_str())
+        # DEBUG
         self._write(cmd)
         # self._execute_cmd(cmd)
 
@@ -109,7 +110,9 @@ class SslCredentials(object):
         # need to run initial creation and copy of certification
         cmd = "/certbot-auto certonly --standalone --agree-tos -m {2} -n --debug -d {0} && {1}" \
               "".format(self.url, self._cat_copy_str(), self.email)
-        self._execute_cmd(cmd)
+        # DEBUG
+        self._write(cmd)
+        #self._execute_cmd(cmd)
 
     def copy_link_efs(self):
 
@@ -136,7 +139,7 @@ class SslCredentials(object):
     def _execute_cmd(self, cmd):
 
         print("EXECUTE: {0}".format(cmd))
-        # self._write("Execute: {0}".format(cmd))
+        self._write("Execute: {0}".format(cmd))
         if not self.test_mode:
             result = subprocess.Popen(cmd, shell=True)
 
