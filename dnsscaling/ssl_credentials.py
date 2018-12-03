@@ -177,7 +177,8 @@ class SslCredentials(object):
         else:
             cat_copy = ''
 
-        cat_copy += "sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > {1}simpa/haproxy.pem" \
+        cat_copy += "sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > /home/ec2-user/haproxy.pem" \
+                    "&& sudo mv /home/ec2-user/haproxy.pem {1}simpa/haproxy.pem" \
                     "".format(self.url, self.lets_encrypt_path)
 
         for pem in self.pem_files:
