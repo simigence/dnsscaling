@@ -14,6 +14,7 @@ class SslCredentials(object):
 
     def __init__(self, url, email, efs_path='', lets_encrypt_path='', test_mode=False):
 
+        self._debug = True
         self.url = url
         self.email = email
         self.test_mode = test_mode
@@ -35,15 +36,20 @@ class SslCredentials(object):
 
         if os.path.isdir(self.efs_cert_path):
 
+            self._write('path efs')
+
             if not all([os.path.exists(os.path.join(self.efs_cert_path, pem)) for pem in self.pem_files]):
+                self._write('path no match')
                 # something is wrong with efs directory so delete to reset certs
                 shutil.rmtree(self.efs_cert_path)
                 os.makedirs(self.efs_cert_path)
                 self.init_cert()
 
+                self._write('path no match end')
+
             elif os.path.isdir(self.live_cert_path):
 
-                self._write('pathlive')
+                self._write('path live')
 
                 # check if all files are the same
                 same = True
@@ -71,14 +77,18 @@ class SslCredentials(object):
                     os.makedirs(self.archive_cert_path)
                     os.makedirs(self.live_cert_path)
                     self.copy_link_efs()
+                    self._write('path not same end')
 
             else:
+                self._write('path no local')
                 # if local doesn't exist create directory and copy all files
                 os.makedirs(self.archive_cert_path)
                 os.makedirs(self.live_cert_path)
                 self.copy_link_efs()
 
         elif os.path.isdir(self.live_cert_path):
+
+            self._write('path outside live')
 
             # make the directory and copy contents
             os.makedirs(self.efs_cert_path)
@@ -95,28 +105,33 @@ class SslCredentials(object):
 
         cmd = "/certbot-auto renew --standalone -n --agree-tos --debug --pre-hook {1} --post-hook {2}" \
               "".format(self.url, self._stop_haproxy_str(), self._cat_copy_str())
-        # DEBUG
+
         self._write(cmd)
-        # self._execute_cmd(cmd)
+        if not self._debug:
+            self._execute_cmd(cmd)
 
     def _write(self, txt):
 
-        if not self.test_mode:
+        if not self.test_mode and self._debug:
             with open('/home/ec2-user/dnscert.log', 'a') as f:
                 f.write(txt + '\n')
+        elif self.test_mode:
+            print(txt)
 
     def init_cert(self):
 
         # need to run initial creation and copy of certification
         cmd = "/certbot-auto certonly --standalone --agree-tos -m {2} -n --debug -d {0} && {1}" \
               "".format(self.url, self._cat_copy_str(), self.email)
-        # DEBUG
+
         self._write(cmd)
-        #self._execute_cmd(cmd)
+        if not self._debug:
+            self._execute_cmd(cmd)
 
     def copy_link_efs(self):
 
         self._write("copy_link")
+
         # copy and symlink all files in live directory
         for i, pem in enumerate(self.pem_files):
 
@@ -138,7 +153,6 @@ class SslCredentials(object):
 
     def _execute_cmd(self, cmd):
 
-        print("EXECUTE: {0}".format(cmd))
         self._write("Execute: {0}".format(cmd))
         if not self.test_mode:
             result = subprocess.Popen(cmd, shell=True)
