@@ -207,15 +207,3 @@ def run_sslcredentials():
         sys.exit()
 
     ssl = SslCredentials(args.url, args.email, debug_mode=args.debug)
-
-
-if __name__ == '__main__':
-
-    url = 'logs.simpa.io'
-    lets_encrypt_path = '/etc/letsencrypt/'
-    cat_copy = "sudo cat {1}live/{0}/fullchain.pem {1}live/{0}/privkey.pem > haproxy.pem && " \
-                "sudo mv haproxy.pem {1}simpa/haproxy.pem".format(url, lets_encrypt_path)
-    print(cat_copy)
-    x = 'cat /etc/letsencrypt/live/logs.simpa.io/fullchain.pem /etc/letsencrypt/live/logs.simpa.io/privkey.pem > /home/ec2-user/haproxy.pem'
-    args = shlex.split(x)
-    print(args)
