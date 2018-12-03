@@ -40,7 +40,7 @@ class TestSslCredentials(unittest.TestCase):
         ep, lp = self._get_paths('empty')
         os.makedirs(ep + self.url)
 
-        s = SslCredentials(self.url, efs_path=ep, lets_encrypt_path=lp, test_mode=True)
+        s = SslCredentials(self.url, 'dummy@email.com', efs_path=ep, lets_encrypt_path=lp, test_mode=True)
         self.assertEqual(True, os.path.exists(ep + self.url))
 
     def test_start_efs(self):
@@ -50,7 +50,7 @@ class TestSslCredentials(unittest.TestCase):
         os.makedirs(ep + self.url)
         self._write_certs(ep + self.url, 'p')
 
-        s = SslCredentials(self.url, efs_path=ep, lets_encrypt_path=lp, test_mode=True)
+        s = SslCredentials(self.url, 'demail@email.com', efs_path=ep, lets_encrypt_path=lp, test_mode=True)
 
         ap = os.path.join(self.tdir, subdir, 'letsencrypt/archive', self.url)
         lp = os.path.join(self.tdir, subdir, 'letsencrypt/live', self.url)
@@ -59,7 +59,7 @@ class TestSslCredentials(unittest.TestCase):
         self.assertTrue(all([os.path.exists(os.path.join(lp, p)) for p in PEMFILES]))
 
         for i, p in enumerate(PEMFILES):
-            with open(os.path.join(lp, p)) as f:
+            with open(os.path.join(ep + self.url, p)) as f:
                 with open(os.path.join(ap, PEM1FILES[i])) as f1:
                     self.assertEqual(f.read(), f1.read())
 

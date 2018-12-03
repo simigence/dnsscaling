@@ -43,6 +43,8 @@ class SslCredentials(object):
 
             elif os.path.isdir(self.live_cert_path):
 
+                self._write('pathlive')
+
                 # check if all files are the same
                 same = True
                 for i, pem in enumerate(self.pem_files):
@@ -59,6 +61,8 @@ class SslCredentials(object):
                             if f1.read() != f2.read():
                                 same = False
                                 break
+
+                self._write('pathlive same: {0}'.format(same))
 
                 if not same:
 
@@ -91,11 +95,14 @@ class SslCredentials(object):
 
         cmd = "/certbot-auto renew --standalone -n --agree-tos --debug --pre-hook {1} --post-hook {2}" \
               "".format(self.url, self._stop_haproxy_str(), self._cat_copy_str())
-        self._execute_cmd(cmd)
+        self._write(cmd)
+        # self._execute_cmd(cmd)
 
     def _write(self, txt):
-        with open('/home/ec2-user/dnscert.log', 'a') as f:
-            f.write(txt + '\n')
+
+        if not self.test_mode:
+            with open('/home/ec2-user/dnscert.log', 'a') as f:
+                f.write(txt + '\n')
 
     def init_cert(self):
 
@@ -106,7 +113,7 @@ class SslCredentials(object):
 
     def copy_link_efs(self):
 
-
+        self._write("copy_link")
         # copy and symlink all files in live directory
         for i, pem in enumerate(self.pem_files):
 
