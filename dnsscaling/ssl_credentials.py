@@ -4,7 +4,6 @@ Object/script to manage ssl credentials with a centralized AWS EFS repository
 
 import argparse
 import os
-import shlex
 import shutil
 import subprocess
 import sys
