@@ -206,7 +206,7 @@ def run_sslcredentials():
         parser.print_help()
         sys.exit()
 
-    ssl = SslCredentials(args.url, args.email, debug_mode=args.debur)
+    ssl = SslCredentials(args.url, args.email, debug_mode=args.debug)
 
 
 if __name__ == '__main__':
