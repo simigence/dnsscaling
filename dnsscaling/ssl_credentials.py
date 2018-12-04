@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 
 
 class SslCredentials(object):
@@ -138,6 +139,8 @@ class SslCredentials(object):
             # break if live path exists
             if os.path.exists(self.live_cert_path):
                 break
+
+            time.sleep(3)
 
     def copy_link_efs(self):
 
