@@ -122,12 +122,22 @@ class SslCredentials(object):
 
     def init_cert(self):
 
-        # need to run initial creation and copy of certification
-        cmd = "/certbot-auto certonly --standalone --agree-tos -d {0} -m {1} -n --debug && {2}" \
-              "".format(self.url, self.email, self._cat_copy_str(parenth=False))
-        self._write(cmd)
-        if self._run_certbot:
-            self._execute_cmd(cmd)
+        tries = 3
+
+        for i in range(tries):
+
+            # need to run initial creation and copy of certification
+            cmd = "/certbot-auto certonly --standalone --agree-tos -d {0} -m {1} -n --debug && {2}" \
+                  "".format(self.url, self.email, self._cat_copy_str(parenth=False))
+            self._write(cmd)
+            if self._run_certbot:
+                self._execute_cmd(cmd)
+            else:
+                break
+
+            # break if live path exists
+            if os.path.exists(self.live_cert_path):
+                break
 
     def copy_link_efs(self):
 
