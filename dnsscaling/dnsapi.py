@@ -10,6 +10,7 @@ import json
 import os
 import requests
 import sys
+import time
 
 from dnsscaling import write_init_script
 
@@ -143,7 +144,11 @@ class DnsMeApi(object):
             self._post(targurl, data)
         except:
             if robust:
-                self._post(targurl, data)
+                time.sleep(2)
+                try:
+                    self._post(targurl, data)
+                except:
+                    return False
             else:
                 return False
         return True
@@ -165,16 +170,22 @@ class DnsMeApi(object):
         targurl = self.url + '/' + str(site_id) + '/records/'
         try:
             self._post(targurl, data)
+            print('post success', targurl)
         except:
             if robust:
-                self._post(targurl, data)
+                time.sleep(2)
+                try:
+                    self._post(targurl, data)
+                except:
+                    pass
             else:
-                raise
+                pass
 
         if robust:
             # verify
-            name_id = self._get_a_record_name(site, name, ipaddress)
+            name_id = self._get_a_record_name(site_id, name, ipaddress)
             if not name_id:
+                time.sleep(2)
                 self._post(targurl, data)
 
     def delete_a_record(self, site, name, ipaddress=''):
@@ -292,3 +303,7 @@ def run_dnsscaling():
         subdomain, domain = get_domain(args.delete_record)
         print("DELETING", domain, subdomain, D.ipaddress)
         D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
+
+if __name__ == '__main__':
+    dnsme = DnsMeApi(test_mode=True, credentials_json='dme_credentials.json')
+    dnsme.add_a_record('simpa.io', 'junk', '35.163.201.231')
