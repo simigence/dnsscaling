@@ -124,6 +124,31 @@ class DnsMeApi(object):
             ret_list.append(x)
         return ret_list
 
+    def add_txt_record(self, site, name, value, ttl=30, robust=True):
+        """
+        Add an A record to the site with name and ipaddress.
+
+        :param site:
+        :param name:
+        :param value:
+        :param ttl:
+        :param robust: will check that the cert exists after an add
+        :return:
+        """
+
+        data = {'name': name, 'type': 'TXT', 'value': value, 'gtdLocation': 'DEFAULT', 'ttl': ttl}
+        site_id = self._get_site_id(site)
+        targurl = self.url + '/' + str(site_id) + '/records/'
+        try:
+            self._post(targurl, data)
+        except:
+            if robust:
+                self._post(targurl, data)
+            else:
+                return False
+        print(f"Wrote TXT record to {site}:{name}")
+        return True
+
     def add_a_record(self, site, name, ipaddress, ttl=30, robust=True):
         """
         Add an A record to the site with name and ipaddress.
@@ -191,6 +216,28 @@ class DnsMeApi(object):
             raise Exception('No id found for name or name and ipaddress')
 
         return name_id
+
+    def delete_txt_record(self, site, name):
+        """
+        Delete all text records from site.
+
+        :param site:
+        :param name:
+        :return:
+        """
+
+        site_id = self._get_site_id(site)
+        if not site_id:
+            raise Exception("No site id found for", site)
+
+        records = self._get_records(site_id, type='TXT', name=name)
+        for del_id in [x['id'] for x in records]:
+            try:
+                targurl = self.url + '/' + str(site_id) + '/records/' + str(del_id)
+                self._delete(targurl)
+                print(f'Deleted: {targurl}')
+            except:
+                print(f"ERROR deleting: {del_id}")
 
 
 def get_aws_ip():
