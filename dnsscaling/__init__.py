@@ -8,12 +8,12 @@ _init_script = Template(
 
 start(){
     touch /var/lock/subsys/dnsscalingdelete
-    sudo /usr/local/bin/dnsscaling -a $url
+    sudo dnsscaling -a $url
     sleep 3
 }
 
 stop(){
-    sudo /usr/local/bin/dnsscaling -d $url
+    sudo dnsscaling -d $url
     sleep 3	
     rm -f /var/lock/subsys/dnsscalingdelete
 }
