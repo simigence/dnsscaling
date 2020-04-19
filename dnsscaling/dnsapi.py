@@ -146,7 +146,6 @@ class DnsMeApi(object):
                 self._post(targurl, data)
             else:
                 return False
-        print(f"Wrote TXT record to {site}:{name}")
         return True
 
     def add_a_record(self, site, name, ipaddress, ttl=30, robust=True):
@@ -235,9 +234,9 @@ class DnsMeApi(object):
             try:
                 targurl = self.url + '/' + str(site_id) + '/records/' + str(del_id)
                 self._delete(targurl)
-                print(f'Deleted: {targurl}')
+                print('Deleted: targurl')
             except:
-                print(f"ERROR deleting: {del_id}")
+                print("ERROR deleting: {del_id}")
 
 
 def get_aws_ip():
