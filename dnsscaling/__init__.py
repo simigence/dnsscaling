@@ -12,6 +12,7 @@ Before=shutdown.target reboot.target
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/dnsscaling -d $url
+ExecStop=/usr/bin/dnsscaling -d $url
 RemainAfterExit=yes
 
 [Install]
