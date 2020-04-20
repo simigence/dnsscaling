@@ -305,6 +305,8 @@ def run_dnsscaling():
         D.add_a_record(domain, subdomain, D.ipaddress)
 
     elif args.delete_record:
+        with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
+            f.write('shutdown ' + D.ipaddress + ' ' + str(time.time()))
         subdomain, domain = get_domain(args.delete_record)
         print("DELETING", domain, subdomain, D.ipaddress)
         D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
