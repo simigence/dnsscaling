@@ -21,7 +21,7 @@ Requires=poweroff.target
 [Service]
 Type=oneshot
 EnvironmentFile=/etc/.dnsscalingdeleteconf
-ExecStart=/usr/bin/dnsscaling $ARG1 $ARG2
+ExecStart=sudo /usr/bin/dnsscaling $ARG1 $ARG2
 RemainAfterExit=yes
 TimeoutStartSec=0
 
