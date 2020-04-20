@@ -11,20 +11,20 @@ _init_script_normal = \
 '''
 [Unit]
 Description=Delete DNS IP
-DefaultDependencies=false
-Wants=network-online.target
-After=network-online.target
-Before=poweroff.target shutdown.target reboot.target halt.target kexec.target
+DefaultDependencies=no
+Conflicts=reboot.target
+Before=poweroff.target halt.target shutdown.target kexec.target
+Requires=poweroff.target
 
 [Service]
 Type=oneshot
-RemainAfterExit=yes
 EnvironmentFile=/etc/.dnsscalingdeleteconf
 ExecStart=/usr/bin/dnsscaling $ARG1 $ARG2
-ExecStop=/usr/bin/dnsscaling $ARG1 $ARG2
+RemainAfterExit=yes
+TimeoutStartSec=0
 
 [Install]
-WantedBy=shutdown.target 
+WantedBy=shutdown.target poweroff.target halt.target kexec.target 
 '''
 
 
