@@ -1,8 +1,13 @@
 
 from string import Template
 
+_conf_script = Template(
+'''
+ARG1=-d
+ARG2=$url
+''')
 
-_init_script = Template(
+_init_script_normal = \
 '''
 [Unit]
 Description=Delete DNS IP
@@ -11,13 +16,14 @@ Before=shutdown.target reboot.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/dnsscaling -d $url
-ExecStop=/usr/bin/dnsscaling -d $url
+EnvironmentFile=/etc/.dnsscalingdeleteconf
+ExecStart=/usr/bin/dnsscaling $ARG1 $ARG2
+ExecStop=/usr/bin/dnsscaling $ARG1 $ARG2
 RemainAfterExit=yes
 
 [Install]
 WantedBy=shutdown.target 
-''')
+'''
 
 
 _init_script_old = Template(
@@ -62,4 +68,10 @@ exit 0
 
 def write_init_script(url, path):
     with open(path + 'dnsscalingdelete.service', 'w') as f:
-        f.write(_init_script.substitute({'url': url}).strip())
+        #f.write(_init_script.substitute({'url': url}).strip())
+        f.write(_init_script_normal)
+
+
+def write_args_file(url, path):
+    with open(path + '.dnsscalingdeleteconf', 'w') as f:
+        f.write(_conf_script.substitute({'url': url}).strip())
