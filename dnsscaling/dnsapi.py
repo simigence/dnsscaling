@@ -11,6 +11,7 @@ import os
 import requests
 import sys
 import time
+import traceback
 
 from dnsscaling import write_init_script, write_args_file
 
@@ -309,7 +310,11 @@ def run_dnsscaling():
             f.write('shutdown ' + D.ipaddress + ' ' + str(time.time()))
         subdomain, domain = get_domain(args.delete_record)
         print("DELETING", domain, subdomain, D.ipaddress)
-        D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
+        try:
+            D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
+        except:
+            with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
+                f.write('error ' + traceback.format_exc())
 
 if __name__ == '__main__':
     dnsme = DnsMeApi(test_mode=True, credentials_json='dme_credentials.json')
