@@ -285,7 +285,7 @@ def run_dnsscaling():
     args = parser.parse_args()
     if args.init_script:
         # write new script
-        write_init_script(args.init_script, '/etc/init.d/')
+        write_init_script(args.init_script, '/etc/systemd/system/')
         sys.exit()
 
     elif (not args.add_record and not args.delete_record) or (args.add_record and args.delete_record):
