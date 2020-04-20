@@ -13,6 +13,8 @@ _init_script_normal = \
 Description=Delete DNS IP
 DefaultDependencies=no
 Conflicts=reboot.target
+Wants=network-online.target
+After=network-online.target
 Before=poweroff.target halt.target shutdown.target kexec.target
 Requires=poweroff.target
 
