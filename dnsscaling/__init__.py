@@ -12,7 +12,7 @@ _init_script_normal = \
 [Unit]
 Description=Delete DNS IP
 DefaultDependencies=false
-Before=shutdown.target reboot.target
+Before=poweroff.target shutdown.target reboot.target halt.target kexec.target
 
 [Service]
 Type=oneshot
