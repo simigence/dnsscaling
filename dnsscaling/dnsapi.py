@@ -204,7 +204,11 @@ class DnsMeApi(object):
         name_id = self._get_a_record_name(site_id, name, ipaddress)
 
         targurl = self.url + '/' + str(site_id) + '/records/' + str(name_id)
-        self._delete(targurl)
+        try:
+            self._delete(targurl)
+        except:
+            time.sleep(3)
+            self._delete(targurl)
 
     def _get_a_record_name(self, site_id, name, ipaddress):
 
