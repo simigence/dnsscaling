@@ -16,10 +16,10 @@ Before=poweroff.target shutdown.target reboot.target halt.target kexec.target
 
 [Service]
 Type=oneshot
+RemainAfterExit=yes
 EnvironmentFile=/etc/.dnsscalingdeleteconf
 ExecStart=/usr/bin/dnsscaling $ARG1 $ARG2
 ExecStop=/usr/bin/dnsscaling $ARG1 $ARG2
-RemainAfterExit=yes
 
 [Install]
 WantedBy=shutdown.target 
