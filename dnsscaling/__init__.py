@@ -1,13 +1,9 @@
 
 from string import Template
 
-_conf_script = Template(
-'''
-ARG1=-d
-ARG2=$url
-''')
 
-_init_script_normal = \
+#ExecStart=sudo /usr/bin/dnsscaling -d $url
+_init_script_normal = Template(
 '''
 [Unit]
 Description=Delete DNS IP
@@ -20,14 +16,14 @@ Requires=poweroff.target
 
 [Service]
 Type=oneshot
-EnvironmentFile=/etc/.dnsscalingdeleteconf
-ExecStart=sudo /usr/bin/dnsscaling $ARG1 $ARG2
+ExecStart=/tmp/tmpscript.sh
 RemainAfterExit=yes
 TimeoutStartSec=0
 
 [Install]
 WantedBy=shutdown.target poweroff.target halt.target kexec.target 
 '''
+)
 
 
 _init_script_old = Template(
@@ -72,10 +68,8 @@ exit 0
 
 def write_init_script(url, path):
     with open(path + 'dnsscalingdelete.service', 'w') as f:
-        #f.write(_init_script.substitute({'url': url}).strip())
-        f.write(_init_script_normal)
+        f.write(_init_script_normal.substitute({'url': url}).strip())
 
-
-def write_args_file(url, path):
-    with open(path + '.dnsscalingdeleteconf', 'w') as f:
-        f.write(_conf_script.substitute({'url': url}).strip())
+    with open('/tmp/tmpscript.sh', 'w') as f:
+        s = '#!/bin/bash\n' + 'sudo /usr/bin/dnsscaling -d' + url
+        f.write(s)
