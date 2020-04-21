@@ -199,16 +199,20 @@ class DnsMeApi(object):
         """
 
         site_id = self._get_site_id(site)
+        with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
+            f.write('site id grabbed ' + ipaddress + '--' + site_id + '--\n')
         if not site_id:
             raise Exception("No site id found for", site)
 
         name_id = self._get_a_record_name(site_id, name, ipaddress)
+        with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
+            f.write('a record name ' + ipaddress + '--' + name_id + '--\n')
 
         targurl = self.url + '/' + str(site_id) + '/records/' + str(name_id)
         try:
             self._delete(targurl)
         except:
-            time.sleep(3)
+            time.sleep(1)
             self._delete(targurl)
 
     def _get_a_record_name(self, site_id, name, ipaddress):
@@ -305,17 +309,21 @@ def run_dnsscaling():
         D.add_a_record(domain, subdomain, D.ipaddress)
 
     elif args.delete_record:
+
+        s = 'shutdown ' + D.ipaddress + ' ' + str(time.time()) + '\n'
         with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-            f.write('shutdown ' + D.ipaddress + ' ' + str(time.time()))
+            f.write(s)
         subdomain, domain = get_domain(args.delete_record)
         print("DELETING", domain, subdomain, D.ipaddress)
         try:
+            with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
+                f.write('start ip call ' + D.ipaddress + '\n')
             D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
             with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-                f.write('succes')
+                f.write('success ' + D.ipaddress + '\n')
         except:
             with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-                f.write('error ' + traceback.format_exc())
+                f.write('error ' + traceback.format_exc() + '\n')
 
 if __name__ == '__main__':
     dnsme = DnsMeApi(test_mode=True, credentials_json='dme_credentials.json')
