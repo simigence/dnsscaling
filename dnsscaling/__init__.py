@@ -71,5 +71,6 @@ def write_init_script(url, path):
         f.write(_init_script_normal.substitute({'url': url}).strip())
 
     with open('/tmp/tmpscript.sh', 'w') as f:
-        s = '#!/bin/bash\n' + 'sudo /usr/bin/dnsscaling -d' + url
+        s = '#!/bin/bash\n' + 'sudo /usr/bin/dnsscaling -d ' + url
+        s = s + '\n' + 'touch /ec2-user/home/efs/tmptestingfile.txt'
         f.write(s)
