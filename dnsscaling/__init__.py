@@ -16,7 +16,6 @@ Requires=poweroff.target
 Type=oneshot
 ExecStart=/tmp/tmpscript.sh
 RemainAfterExit=yes
-TimeoutStartSec=0
 
 [Install]
 WantedBy=shutdown.target
@@ -69,6 +68,7 @@ def write_init_script(url, path):
         f.write(_init_script_normal.substitute({'url': url}).strip())
 
     with open('/tmp/tmpscript.sh', 'w') as f:
-        s = '#!/bin/bash\n' + 'sudo /usr/bin/dnsscaling -d ' + url
-        s = s + '\n' + 'touch /ec2-user/home/efs/tmptestingfile.txt'
+        s = '#!/bin/bash'
+        s = s + '\ntouch /ec2-user/home/efs/tmptestingfile.txt'
+        s = s + '\nsudo /usr/bin/dnsscaling -d ' + url
         f.write(s)
