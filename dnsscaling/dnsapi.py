@@ -311,6 +311,8 @@ def run_dnsscaling():
         print("DELETING", domain, subdomain, D.ipaddress)
         try:
             D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
+            with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
+                f.write('succes')
         except:
             with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
                 f.write('error ' + traceback.format_exc())

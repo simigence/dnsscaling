@@ -9,9 +9,7 @@ _init_script_normal = Template(
 Description=Delete DNS IP
 DefaultDependencies=no
 Conflicts=reboot.target
-Wants=network-online.target
-After=network-online.target
-Before=poweroff.target halt.target shutdown.target kexec.target
+Before=poweroff.target halt.target shutdown.target
 Requires=poweroff.target
 
 [Service]
@@ -21,7 +19,7 @@ RemainAfterExit=yes
 TimeoutStartSec=0
 
 [Install]
-WantedBy=shutdown.target poweroff.target halt.target kexec.target 
+WantedBy=shutdown.target
 '''
 )
 
