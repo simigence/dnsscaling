@@ -69,6 +69,6 @@ def write_init_script(url, path):
 
     with open('/tmp/tmpscript.sh', 'w') as f:
         s = '#!/bin/bash'
-        s = s + '\ntouch /ec2-user/home/efs/tmptestingfile.txt'
+        s = s + '\nsudo touch /home/ec2-user/efs/tmptestingfile.txt'
         s = s + '\nsudo /usr/bin/dnsscaling -d ' + url
         f.write(s)
