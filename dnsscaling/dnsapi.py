@@ -100,7 +100,7 @@ class DnsMeApi(object):
     def _get_account_data(self):
         return self._get(self.url, sub='data')
 
-    def _get_site_id(self, site):
+    def get_site_id(self, site):
 
         data = self._get_account_data()
 
@@ -110,7 +110,7 @@ class DnsMeApi(object):
 
         return ''
 
-    def _get_records(self, site_id, type='', name='', value=''):
+    def get_records(self, site_id, type='', name='', value=''):
 
         targurl = self.url + '/' + str(site_id) + '/records'
 
@@ -143,7 +143,7 @@ class DnsMeApi(object):
         """
 
         data = {'name': name, 'type': 'TXT', 'value': value, 'gtdLocation': 'DEFAULT', 'ttl': ttl}
-        site_id = self._get_site_id(site)
+        site_id = self.get_site_id(site)
         targurl = self.url + '/' + str(site_id) + '/records/'
         try:
             self._post(targurl, data)
@@ -171,7 +171,7 @@ class DnsMeApi(object):
         """
 
         data = {'name': name, 'type': 'A', 'value': ipaddress, 'gtdLocation': 'DEFAULT', 'ttl': ttl}
-        site_id = self._get_site_id(site)
+        site_id = self.get_site_id(site)
         targurl = self.url + '/' + str(site_id) + '/records/'
         try:
             self._post(targurl, data)
@@ -202,7 +202,7 @@ class DnsMeApi(object):
         :return:
         """
 
-        site_id = self._get_site_id(site)
+        site_id = self.get_site_id(site)
         #with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
         #    f.write('site id grabbed ' + ipaddress + '--' + site_id + '--\n')
         if not site_id:
@@ -221,7 +221,7 @@ class DnsMeApi(object):
 
     def _get_a_record_name(self, site_id, name, ipaddress):
 
-        r = self._get_records(site_id, type='A', name=name)
+        r = self.get_records(site_id, type='A', name=name)
 
         name_id = None
         if len(r) > 1 and not ipaddress:
@@ -242,8 +242,8 @@ class DnsMeApi(object):
 
     def delete_a_ip(self, site, ipaddress=''):
 
-        site_id = self._get_site_id(site)
-        r = dnsme._get_records(site_id, type='A', value=ipaddress)
+        site_id = self.get_site_id(site)
+        r = dnsme.get_records(site_id, type='A', value=ipaddress)
         id_list = [x['id'] for x in r]
 
         for ip_id in id_list:
@@ -259,7 +259,7 @@ class DnsMeApi(object):
 
     def _get_a_record_ip(self, site_id, name, ipaddress):
 
-        r = self._get_records(site_id, type='A', name=name)
+        r = self.get_records(site_id, type='A', name=name)
 
         name_id = None
         if len(r) > 1 and not ipaddress:
@@ -287,11 +287,11 @@ class DnsMeApi(object):
         :return:
         """
 
-        site_id = self._get_site_id(site)
+        site_id = self.get_site_id(site)
         if not site_id:
             raise Exception("No site id found for", site)
 
-        records = self._get_records(site_id, type='TXT', name=name)
+        records = self.get_records(site_id, type='TXT', name=name)
         for del_id in [x['id'] for x in records]:
             try:
                 targurl = self.url + '/' + str(site_id) + '/records/' + str(del_id)
@@ -376,10 +376,17 @@ def run_dnsscaling():
 
 if __name__ == '__main__':
     dnsme = DnsMeApi(test_mode=True, credentials_json='dme_credentials.json')
-    iptest = '35.163.201.231'
+
     site = 'simpa.io'
     sttime = time.time()
+    site_id = dnsme.get_site_id(site)
+    print(site_id)
+    records = dnsme.get_records(site_id, type="A")
+    for r in records:
+        ip_id = r['id']
+        ip_add = r['value']
+        print(ip_add, ip_id)
     #dnsme.add_a_record('simpa.io', 'junk', iptest)
-    dnsme.delete_a_ip(site, iptest)
+    #dnsme.delete_a_ip(site, iptest)
     print(time.time()-sttime)
 
