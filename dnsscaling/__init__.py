@@ -2,7 +2,7 @@
 from string import Template
 
 
-_init_script_normal1 = \
+_init_script_normal = \
 '''
 [Unit]
 Description=Delete DNS IP
@@ -17,24 +17,6 @@ KillMode=none
 
 [Install]
 WantedBy=poweroff.target halt.target shutdown.target reboot.target kexec.target
-'''
-
-_init_script_normal = \
-'''
-[Unit]
-Description=Delete DNS IP
-Before=shutdown.target reboot.target halt.target
-Requires=network-online.target network.target
-
-[Service]
-KillMode=none
-ExecStart=/bin/true
-ExecStop=/tmp/ip_removal.sh
-RemainAfterExit=yes
-Type=oneshot
-
-[Install]
-WantedBy=multi-user.target
 '''
 
 
