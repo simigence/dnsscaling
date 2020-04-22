@@ -68,4 +68,5 @@ def write_init_script(url, path):
     with open('/tmp/ip_removal.sh', 'w') as f:
         s = '#!/bin/bash'
         s = s + '\nsudo touch /home/ec2-user/efs/dns_ip_addresses/remove/$(curl http://169.254.169.254/latest/meta-data/public-ipv4)'
+        s = s + '\nsudo /usr/bin/dnsscaling -r $(curl http://169.254.169.254/latest/meta-data/public-ipv4)'
         f.write(s)

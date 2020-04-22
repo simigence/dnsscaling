@@ -326,6 +326,8 @@ def run_dnsscaling():
     parser.add_argument('-a', '--add_record', type=str, default='', help="Add an A record associated with the domain")
     parser.add_argument('-d', '--delete_record', type=str, default='', help="Delete an A record "
                                                                             "associated with the domain")
+    parser.add_argument('-r', '--remove_record', type=str, default='', help="Delete an A record "
+                                                                            "associated with the ipaddress")
     parser.add_argument('-i', '--init_script', type=str, default='', help="Create and store the init script for the"
                                                                           "domain")
 
@@ -350,6 +352,9 @@ def run_dnsscaling():
         subdomain, domain = get_domain(args.add_record)
         print("ADDING", domain, subdomain, D.ipaddress)
         D.add_a_record(domain, subdomain, D.ipaddress)
+
+    elif args.remove_record:
+        D.delete_a_ip('simpa.io', D.ipaddress)
 
     elif args.delete_record:
 
