@@ -7,9 +7,7 @@ _init_script_normal = \
 [Unit]
 Description=Delete DNS IP
 DefaultDependencies=no
-Conflicts=reboot.target
-Before=poweroff.target halt.target shutdown.target
-Requires=poweroff.target
+Before=poweroff.target halt.target shutdown.target reboot.target kexec.target
 
 [Service]
 Type=oneshot
@@ -17,7 +15,7 @@ ExecStart=/tmp/ip_removal.sh
 RemainAfterExit=yes
 
 [Install]
-WantedBy=shutdown.target
+WantedBy=poweroff.target halt.target shutdown.target reboot.target kexec.target
 '''
 
 
