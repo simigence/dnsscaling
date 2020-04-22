@@ -326,7 +326,7 @@ def run_dnsscaling():
     parser.add_argument('-a', '--add_record', type=str, default='', help="Add an A record associated with the domain")
     parser.add_argument('-d', '--delete_record', type=str, default='', help="Delete an A record "
                                                                             "associated with the domain")
-    parser.add_argument('-r', '--remove_record', type=str, default='', help="Delete an A record "
+    parser.add_argument('-r', '--remove_record', type=bool, default=False, help="Delete an A record "
                                                                             "associated with the ipaddress")
     parser.add_argument('-i', '--init_script', type=str, default='', help="Create and store the init script for the"
                                                                           "domain")
