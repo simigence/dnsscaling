@@ -19,6 +19,7 @@ setup(
     zip_safe=False,
     install_requires=[
         'requests',
+        'urllib3',
     ],
     entry_points={
         'console_scripts': [

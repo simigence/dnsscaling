@@ -2,8 +2,7 @@
 from string import Template
 
 
-#ExecStart=sudo /usr/bin/dnsscaling -d $url
-_init_script_normal = Template(
+_init_script_normal = \
 '''
 [Unit]
 Description=Delete DNS IP
@@ -14,13 +13,12 @@ Requires=poweroff.target
 
 [Service]
 Type=oneshot
-ExecStart=/tmp/tmpscript.sh
+ExecStart=/tmp/ip_removal.sh
 RemainAfterExit=yes
 
 [Install]
 WantedBy=shutdown.target
 '''
-)
 
 
 _init_script_old = Template(
@@ -64,11 +62,11 @@ exit 0
 
 
 def write_init_script(url, path):
-    with open(path + 'dnsscalingdelete.service', 'w') as f:
-        f.write(_init_script_normal.substitute({'url': url}).strip())
 
-    with open('/tmp/tmpscript.sh', 'w') as f:
+    with open('/etc/systemd/system/ip_removal.service', 'w') as f:
+        f.write(_init_script_normal)
+
+    with open('/tmp/ip_removal.sh', 'w') as f:
         s = '#!/bin/bash'
-        s = s + '\nsudo touch /home/ec2-user/efs/tmptestingfile.txt'
-        s = s + '\nsudo /usr/bin/dnsscaling -d ' + url
+        s = s + '\nsudo touch /home/ec2-user/efs/dns_ip_addresses/remove/$(curl http://169.254.169.254/latest/meta-data/public-ipv4)'
         f.write(s)

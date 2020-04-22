@@ -8,7 +8,7 @@ import hashlib
 import hmac
 import json
 import os
-import requests
+import urllib3
 import sys
 import time
 import traceback
@@ -61,12 +61,13 @@ class DnsMeApi(object):
 
         headers = self._create_headers()
 
-        r = requests.get(url, headers=headers)
-        if r.status_code != 200 and r.status_code != 201:
-            s = 'Code ' + str(r.status_code) + ':' + str(r.text)
+        http = urllib3.PoolManager()
+        r = http.request('GET', url=url, headers=headers)
+        if r.status != 200 and r.status != 201:
+            s = 'Code ' + str(r.status) + ':' + str(r.text)
             raise Exception(s)
 
-        content = json.loads(r.content)
+        content = json.loads(r.data.decode('utf-8'))
         if sub:
             return content[sub]
         return content
@@ -74,12 +75,13 @@ class DnsMeApi(object):
     def _post(self, url, data, sub=''):
 
         headers = self._create_headers()
-        r = requests.post(url, data=json.dumps(data).encode('utf-8'), headers=headers)
-        if r.status_code != 200 and r.status_code != 201:
-            s = 'Code ' + str(r.status_code) + ' : Something went wrong with POST'
+        http = urllib3.PoolManager()
+        r = http.request('POST', url=url, headers=headers, body=json.dumps(data).encode('utf-8'))
+        if r.status != 200 and r.status != 201:
+            s = 'Code ' + str(r.status) + ' : Something went wrong with POST'
             raise Exception(s)
 
-        content = json.loads(r.content)
+        content = json.loads(r.data.decode('utf-8'))
         if sub:
             return content['sub']
         return content
@@ -87,10 +89,12 @@ class DnsMeApi(object):
     def _delete(self, url):
 
         headers = self._create_headers()
-        r = requests.delete(url, headers=headers)
-        if r.status_code != 200 and r.status_code != 201:
-            s = 'Code ' + str(r.status_code)
+        http = urllib3.PoolManager()
+        r = http.request('DELETE', url=url, headers=headers)
+        if r.status != 200 and r.status != 201:
+            s = 'Code ' + str(r.status)
             raise Exception(s)
+
         return r
 
     def _get_account_data(self):
@@ -199,14 +203,14 @@ class DnsMeApi(object):
         """
 
         site_id = self._get_site_id(site)
-        with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-            f.write('site id grabbed ' + ipaddress + '--' + site_id + '--\n')
+        #with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
+        #    f.write('site id grabbed ' + ipaddress + '--' + site_id + '--\n')
         if not site_id:
             raise Exception("No site id found for", site)
 
         name_id = self._get_a_record_name(site_id, name, ipaddress)
-        with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-            f.write('a record name ' + ipaddress + '--' + name_id + '--\n')
+        #with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
+        #    f.write('a record name ' + ipaddress + '--' + name_id + '--\n')
 
         targurl = self.url + '/' + str(site_id) + '/records/' + str(name_id)
         try:
@@ -216,6 +220,44 @@ class DnsMeApi(object):
             self._delete(targurl)
 
     def _get_a_record_name(self, site_id, name, ipaddress):
+
+        r = self._get_records(site_id, type='A', name=name)
+
+        name_id = None
+        if len(r) > 1 and not ipaddress:
+            raise Exception('More than one IP address found for the record name, specify an ip address to delete.')
+        elif len(r) == 0:
+            s = 'No A records found with' + name + 'for site id' + site_id
+            raise Exception(s)
+        elif len(r) == 1:
+            name_id = r[0]['id']
+        else:
+            for x in r:
+                if x['value'] == ipaddress:
+                    name_id = x['id']
+        if not name_id:
+            raise Exception('No id found for name or name and ipaddress')
+
+        return name_id
+
+    def delete_a_ip(self, site, ipaddress=''):
+
+        site_id = self._get_site_id(site)
+        r = dnsme._get_records(site_id, type='A', value=ipaddress)
+        id_list = [x['id'] for x in r]
+
+        for ip_id in id_list:
+            targurl = self.url + '/' + str(site_id) + '/records/' + str(ip_id)
+            try:
+                self._delete(targurl)
+                print('delete success', targurl)
+            except:
+                time.sleep(0.5)
+                self._delete(targurl)
+                print('delete success', targurl)
+
+
+    def _get_a_record_ip(self, site_id, name, ipaddress):
 
         r = self._get_records(site_id, type='A', name=name)
 
@@ -262,7 +304,8 @@ class DnsMeApi(object):
 def get_aws_ip():
     try:
         # check for aws ec2 instance
-        r = requests.get('http://169.254.169.254/latest/meta-data/public-ipv4', timeout=0.25)
+        http = urllib3.PoolManager()
+        r = http.request('GET', url='http://169.254.169.254/latest/meta-data/public-ipv4', timeout=0.5)
         aws_ip = r.text
     except:
         aws_ip = None
@@ -311,20 +354,27 @@ def run_dnsscaling():
     elif args.delete_record:
 
         s = 'shutdown ' + D.ipaddress + ' ' + str(time.time()) + '\n'
-        with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-            f.write(s)
+        #with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
+        #    f.write(s)
         subdomain, domain = get_domain(args.delete_record)
         print("DELETING", domain, subdomain, D.ipaddress)
         try:
-            with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-                f.write('start ip call ' + D.ipaddress + '\n')
+            #with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
+            #    f.write('start ip call ' + D.ipaddress + '\n')
             D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
-            with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-                f.write('success ' + D.ipaddress + '\n')
+            #with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
+            #    f.write('success ' + D.ipaddress + '\n')
         except:
-            with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-                f.write('error ' + traceback.format_exc() + '\n')
+            pass
+            #with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
+            #    f.write('error ' + traceback.format_exc() + '\n')
 
 if __name__ == '__main__':
     dnsme = DnsMeApi(test_mode=True, credentials_json='dme_credentials.json')
-    dnsme.add_a_record('simpa.io', 'junk', '35.163.201.231')
+    iptest = '35.163.201.231'
+    site = 'simpa.io'
+    sttime = time.time()
+    #dnsme.add_a_record('simpa.io', 'junk', iptest)
+    dnsme.delete_a_ip(site, iptest)
+    print(time.time()-sttime)
+
