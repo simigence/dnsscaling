@@ -306,7 +306,7 @@ def get_aws_ip():
         # check for aws ec2 instance
         http = urllib3.PoolManager()
         r = http.request('GET', url='http://169.254.169.254/latest/meta-data/public-ipv4', timeout=0.5)
-        aws_ip = r.text
+        aws_ip = r.data
     except:
         aws_ip = None
     return aws_ip
