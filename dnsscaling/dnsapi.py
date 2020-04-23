@@ -75,7 +75,7 @@ class DnsMeApi(object):
 
         headers = self._create_headers()
 
-        r = requests.post(url=url, headers=headers, body=json.dumps(data).encode('utf-8'))
+        r = requests.post(url=url, headers=headers, data=json.dumps(data).encode('utf-8'))
         if r.status_code != 200 and r.status_code != 201:
             s = 'Code ' + str(r.status_code) + ':' + str(r.text)
             raise Exception(s)
