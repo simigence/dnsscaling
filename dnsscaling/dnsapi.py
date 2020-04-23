@@ -174,7 +174,6 @@ class DnsMeApi(object):
         targurl = self.url + '/' + str(site_id) + '/records/'
         try:
             self._post(targurl, data)
-            print('post success', targurl)
         except:
             if robust:
                 time.sleep(2)
@@ -202,14 +201,10 @@ class DnsMeApi(object):
         """
 
         site_id = self.get_site_id(site)
-        #with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-        #    f.write('site id grabbed ' + ipaddress + '--' + site_id + '--\n')
         if not site_id:
             raise Exception("No site id found for", site)
 
         name_id = self._get_a_record_name(site_id, name, ipaddress)
-        #with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-        #    f.write('a record name ' + ipaddress + '--' + name_id + '--\n')
 
         targurl = self.url + '/' + str(site_id) + '/records/' + str(name_id)
         try:
@@ -240,6 +235,7 @@ class DnsMeApi(object):
         return name_id
 
     def delete_a_id(self, site_id: str, ip_id: str):
+
         targurl = self.url + '/' + str(site_id) + '/records/' + str(ip_id)
         self._delete(targurl)
 
@@ -253,11 +249,9 @@ class DnsMeApi(object):
             targurl = self.url + '/' + str(site_id) + '/records/' + str(ip_id)
             try:
                 self._delete(targurl)
-                print('delete success', targurl)
             except:
                 time.sleep(0.5)
                 self._delete(targurl)
-                print('delete success', targurl)
 
 
     def _get_a_record_ip(self, site_id, name, ipaddress):
@@ -299,9 +293,8 @@ class DnsMeApi(object):
             try:
                 targurl = self.url + '/' + str(site_id) + '/records/' + str(del_id)
                 self._delete(targurl)
-                print('Deleted: targurl')
             except:
-                print("ERROR deleting: {del_id}")
+                print("ERROR deleting")
 
 
 def get_aws_ip():
@@ -352,7 +345,6 @@ def run_dnsscaling():
 
     if args.add_record:
         subdomain, domain = get_domain(args.add_record)
-        print("ADDING", domain, subdomain, D.ipaddress)
         D.add_a_record(domain, subdomain, D.ipaddress)
 
     elif args.remove_record:
@@ -360,37 +352,6 @@ def run_dnsscaling():
 
     elif args.delete_record:
 
-        s = 'shutdown ' + D.ipaddress + ' ' + str(time.time()) + '\n'
-        #with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-        #    f.write(s)
         subdomain, domain = get_domain(args.delete_record)
-        print("DELETING", domain, subdomain, D.ipaddress)
-        try:
-            #with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-            #    f.write('start ip call ' + D.ipaddress + '\n')
-            D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
-            #with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-            #    f.write('success ' + D.ipaddress + '\n')
-        except:
-            pass
-            #with open('/home/ec2-user/efs/tmpdnsdelete.txt', 'a') as f:
-            #    f.write('error ' + traceback.format_exc() + '\n')
-
-if __name__ == '__main__':
-    dnsme = DnsMeApi(test_mode=True, credentials_json='dme_credentials.json')
-
-    site = 'simpa.io'
-    sttime = time.time()
-    site_id = dnsme.get_site_id(site)
-    print(site_id)
-    records = dnsme.get_records(site_id, type="A")
-    for r in records:
-        ip_id = r['id']
-        ip_add = r['value']
-        if ip_add == '34.212.202.34':
-            print("TRY DELETE")
-            dnsme.delete_a_id(site_id, str(ip_id))
-    #dnsme.add_a_record('simpa.io', 'junk', iptest)
-    #dnsme.delete_a_ip(site, iptest)
-    print(time.time()-sttime)
+        D.delete_a_record(domain, subdomain, ipaddress=D.ipaddress)
 
