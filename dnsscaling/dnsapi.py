@@ -242,7 +242,7 @@ class DnsMeApi(object):
     def delete_a_ip(self, site, ipaddress=''):
 
         site_id = self.get_site_id(site)
-        r = dnsme.get_records(site_id, type='A', value=ipaddress)
+        r = self.get_records(site_id, type='A', value=ipaddress)
         id_list = [x['id'] for x in r]
 
         for ip_id in id_list:
