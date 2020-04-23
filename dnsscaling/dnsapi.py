@@ -234,7 +234,7 @@ class DnsMeApi(object):
 
         return name_id
 
-    def delete_a_id(self, site_id: str, ip_id: str):
+    def delete_a_id(self, site_id, ip_id):
 
         targurl = self.url + '/' + str(site_id) + '/records/' + str(ip_id)
         self._delete(targurl)
