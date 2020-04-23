@@ -8,7 +8,7 @@ import hashlib
 import hmac
 import json
 import os
-import urllib3
+import requests
 import sys
 import time
 import traceback
@@ -61,13 +61,12 @@ class DnsMeApi(object):
 
         headers = self._create_headers()
 
-        http = urllib3.PoolManager()
-        r = http.request('GET', url=url, headers=headers)
-        if r.status != 200 and r.status != 201:
-            s = 'Code ' + str(r.status) + ':' + str(r.text)
+        r = requests.get(url=url, headers=headers)
+        if r.status_code != 200 and r.status_code != 201:
+            s = 'Code ' + str(r.status_code) + ':' + str(r.text)
             raise Exception(s)
 
-        content = json.loads(r.data.decode('utf-8'))
+        content = json.loads(r.content.decode('utf-8'))
         if sub:
             return content[sub]
         return content
@@ -75,13 +74,13 @@ class DnsMeApi(object):
     def _post(self, url, data, sub=''):
 
         headers = self._create_headers()
-        http = urllib3.PoolManager()
-        r = http.request('POST', url=url, headers=headers, body=json.dumps(data).encode('utf-8'))
-        if r.status != 200 and r.status != 201:
-            s = 'Code ' + str(r.status) + ' : Something went wrong with POST'
+
+        r = requests.post(url=url, headers=headers, body=json.dumps(data).encode('utf-8'))
+        if r.status_code != 200 and r.status_code != 201:
+            s = 'Code ' + str(r.status_code) + ':' + str(r.text)
             raise Exception(s)
 
-        content = json.loads(r.data.decode('utf-8'))
+        content = json.loads(r.content.decode('utf-8'))
         if sub:
             return content['sub']
         return content
@@ -89,10 +88,10 @@ class DnsMeApi(object):
     def _delete(self, url):
 
         headers = self._create_headers()
-        http = urllib3.PoolManager()
-        r = http.request('DELETE', url=url, headers=headers)
-        if r.status != 200 and r.status != 201:
-            s = 'Code ' + str(r.status)
+
+        r = requests.get(url=url, headers=headers)
+        if r.status_code != 200 and r.status_code != 201:
+            s = 'Code ' + str(r.status_code) + ':' + str(r.text)
             raise Exception(s)
 
         return r
@@ -304,9 +303,8 @@ class DnsMeApi(object):
 def get_aws_ip():
     try:
         # check for aws ec2 instance
-        http = urllib3.PoolManager()
-        r = http.request('GET', url='http://169.254.169.254/latest/meta-data/public-ipv4', timeout=0.5)
-        aws_ip = r.data
+        r = requests.get(url='http://169.254.169.254/latest/meta-data/public-ipv4', timeout=0.5)
+        aws_ip = r.text
     except:
         aws_ip = None
     return aws_ip
