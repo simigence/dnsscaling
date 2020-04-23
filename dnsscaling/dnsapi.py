@@ -89,7 +89,7 @@ class DnsMeApi(object):
 
         headers = self._create_headers()
 
-        r = requests.get(url=url, headers=headers)
+        r = requests.delete(url=url, headers=headers)
         if r.status_code != 200 and r.status_code != 201:
             s = 'Code ' + str(r.status_code) + ':' + str(r.text)
             raise Exception(s)
@@ -239,6 +239,10 @@ class DnsMeApi(object):
 
         return name_id
 
+    def delete_a_id(self, site_id: str, ip_id: str):
+        targurl = self.url + '/' + str(site_id) + '/records/' + str(ip_id)
+        self._delete(targurl)
+
     def delete_a_ip(self, site, ipaddress=''):
 
         site_id = self.get_site_id(site)
@@ -383,7 +387,9 @@ if __name__ == '__main__':
     for r in records:
         ip_id = r['id']
         ip_add = r['value']
-        print(ip_add, ip_id)
+        if ip_add == '34.212.202.34':
+            print("TRY DELETE")
+            dnsme.delete_a_id(site_id, str(ip_id))
     #dnsme.add_a_record('simpa.io', 'junk', iptest)
     #dnsme.delete_a_ip(site, iptest)
     print(time.time()-sttime)
