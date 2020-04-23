@@ -175,6 +175,7 @@ class DnsMeApi(object):
         try:
             self._post(targurl, data)
         except:
+            print(traceback.format_exc())
             if robust:
                 time.sleep(2)
                 try:
@@ -215,22 +216,25 @@ class DnsMeApi(object):
 
     def _get_a_record_name(self, site_id, name, ipaddress):
 
-        r = self.get_records(site_id, type='A', name=name)
+        try:
+            r = self.get_records(site_id, type='A', name=name)
 
-        name_id = None
-        if len(r) > 1 and not ipaddress:
-            raise Exception('More than one IP address found for the record name, specify an ip address to delete.')
-        elif len(r) == 0:
-            s = 'No A records found with' + name + 'for site id' + site_id
-            raise Exception(s)
-        elif len(r) == 1:
-            name_id = r[0]['id']
-        else:
-            for x in r:
-                if x['value'] == ipaddress:
-                    name_id = x['id']
-        if not name_id:
-            raise Exception('No id found for name or name and ipaddress')
+            name_id = None
+            if len(r) > 1 and not ipaddress:
+                raise Exception('More than one IP address found for the record name, specify an ip address to delete.')
+            elif len(r) == 0:
+                s = 'No A records found with' + name + 'for site id' + site_id
+                raise Exception(s)
+            elif len(r) == 1:
+                name_id = r[0]['id']
+            else:
+                for x in r:
+                    if x['value'] == ipaddress:
+                        name_id = x['id']
+            if not name_id:
+                raise Exception('No id found for name or name and ipaddress')
+        except:
+            name_id = None
 
         return name_id
 
